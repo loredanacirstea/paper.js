@@ -1,3 +1,7 @@
+The `svg-boolean-op` is focused on providing a light boolean operations solution for SVG (not canvas), based on Paper.js.
+
+
+
 # Paper.js - The Swiss Army Knife of Vector Graphics Scripting [![Build Status](https://travis-ci.org/paperjs/paper.js.svg?branch=develop)](https://travis-ci.org/paperjs/paper.js) [![NPM](https://img.shields.io/npm/v/paper.svg)](https://www.npmjs.com/package/paper) ![Bower](https://img.shields.io/bower/v/paper.svg)
 
 If you want to work with Paper.js, simply download the latest "stable" version
