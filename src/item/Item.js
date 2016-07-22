@@ -149,7 +149,7 @@ new function() { // Injection scope for various item event handlers
         if (point)
             matrix.translate(point);
         matrix._owner = this;
-        this._style = new Style(project._currentStyle, this, project);
+        //this._style = new Style(project._currentStyle, this, project);
         // Do not add to the project if it's an internal path,  or if
         // props.insert  or settings.isnertItems is false.
         if (internal || hasProps && props.insert === false
@@ -195,8 +195,7 @@ new function() { // Injection scope for various item event handlers
         // Serialize style fields, but only if they differ from defaults.
         // Do not serialize styles on Groups and Layers, since they just unify
         // their children's own styles.
-        if (!(this instanceof Group))
-            serialize(this._style._defaults);
+
         // There is no compact form for Item serialization, we always keep the
         // class.
         return [ this._class, props ];
@@ -338,72 +337,6 @@ new function() { // Injection scope for various item event handlers
         this._name = name || undefined;
         this._changed(/*#=*/ChangeFlag.ATTRIBUTE);
     },
-
-    /**
-     * The path style of the item.
-     *
-     * @bean
-     * @name Item#getStyle
-     * @type Style
-     *
-     * @example {@paperscript}
-     * // Applying several styles to an item in one go, by passing an object
-     * // to its style property:
-     * var circle = new Path.Circle({
-     *     center: [80, 50],
-     *     radius: 30
-     * });
-     * circle.style = {
-     *     fillColor: 'blue',
-     *     strokeColor: 'red',
-     *     strokeWidth: 5
-     * };
-     *
-     * @example {@paperscript split=true height=100}
-     * // Copying the style of another item:
-     * var path = new Path.Circle({
-     *     center: [50, 50],
-     *     radius: 30,
-     *     fillColor: 'red'
-     * });
-     *
-     * var path2 = new Path.Circle({
-     *     center: new Point(180, 50),
-     *     radius: 20
-     * });
-     *
-     * // Copy the path style of path:
-     * path2.style = path.style;
-     *
-     * @example {@paperscript}
-     * // Applying the same style object to multiple items:
-     * var myStyle = {
-     *     fillColor: 'red',
-     *     strokeColor: 'blue',
-     *     strokeWidth: 4
-     * };
-     *
-     * var path = new Path.Circle({
-     *     center: [50, 50],
-     *     radius: 30
-     * });
-     * path.style = myStyle;
-     *
-     * var path2 = new Path.Circle({
-     *     center: new Point(150, 50),
-     *     radius: 20
-     * });
-     * path2.style = myStyle;
-     */
-    getStyle: function() {
-        return this._style;
-    },
-
-    setStyle: function(style) {
-        // Don't access _style directly so Path#getStyle() can be overridden for
-        // CompoundPaths.
-        this.getStyle().set(style);
-    }
 }, Base.each(['locked', 'visible', 'blendMode', 'opacity', 'guide'],
     // Produce getter/setters for properties. We need setters because we want to
     // call _changed() if a property was modified.
@@ -1437,7 +1370,6 @@ new function() { // Injection scope for various item event handlers
         // NOTE: We do not compare name and selected state.
         // TODO: Consider not comparing locked and visible also?
         return item === this || item && this._class === item._class
-                && this._style.equals(item._style)
                 && this._matrix.equals(item._matrix)
                 && this._locked === item._locked
                 && this._visible === item._visible
@@ -1551,7 +1483,6 @@ new function() { // Injection scope for various item event handlers
      */
     copyAttributes: function(source, excludeMatrix) {
         // Copy over style
-        this.setStyle(source._style);
         // Only copy over these fields if they are actually defined in 'source',
         // meaning the default value has been overwritten (default is on
         // prototype).
@@ -2697,34 +2628,6 @@ new function() { // Injection scope for hit-test functions shared with project
      */
     // TODO: isValid / checkValid
 
-    /**
-     * {@grouptitle Style Tests}
-     *
-     * Checks whether the item has a fill.
-     *
-     * @return {Boolean} {@true if the item has a fill}
-     */
-    hasFill: function() {
-        return this.getStyle().hasFill();
-    },
-
-    /**
-     * Checks whether the item has a stroke.
-     *
-     * @return {Boolean} {@true if the item has a stroke}
-     */
-    hasStroke: function() {
-        return this.getStyle().hasStroke();
-    },
-
-    /**
-     * Checks whether the item has a shadow.
-     *
-     * @return {Boolean} {@true if the item has a shadow}
-     */
-    hasShadow: function() {
-        return this.getStyle().hasShadow();
-    },
 
     /**
      * Returns -1 if 'this' is above 'item', 1 if below, 0 if their order is not
@@ -2872,259 +2775,6 @@ new function() { // Injection scope for hit-test functions shared with project
         return false;
     },
 
-    // Document all style properties which get injected into Item by Style:
-
-    /**
-     * {@grouptitle Stroke Style}
-     *
-     * The color of the stroke.
-     *
-     * @name Item#strokeColor
-     * @property
-     * @type Color
-     *
-     * @example {@paperscript}
-     * // Setting the stroke color of a path:
-     *
-     * // Create a circle shaped path at { x: 80, y: 50 }
-     * // with a radius of 35:
-     * var circle = new Path.Circle({
-     *     center: [80, 50],
-     *     radius: 35
-     * });
-     *
-     * // Set its stroke color to RGB red:
-     * circle.strokeColor = new Color(1, 0, 0);
-     */
-
-    /**
-     * The width of the stroke.
-     *
-     * @name Item#strokeWidth
-     * @property
-     * @type Number
-     *
-     * @example {@paperscript}
-     * // Setting an item's stroke width:
-     *
-     * // Create a circle shaped path at { x: 80, y: 50 }
-     * // with a radius of 35:
-     * var circle = new Path.Circle({
-     *     center: [80, 50],
-     *     radius: 35,
-     *     strokeColor: 'red'
-     * });
-     *
-     * // Set its stroke width to 10:
-     * circle.strokeWidth = 10;
-     */
-
-    /**
-     * The shape to be used at the beginning and end of open {@link Path} items,
-     * when they have a stroke.
-     *
-     * @name Item#strokeCap
-     * @property
-     * @type String
-     * @values 'round', 'square', 'butt'
-     * @default 'butt'
-     *
-     * @example {@paperscript height=200}
-     * // A look at the different stroke caps:
-     *
-     * var line = new Path({
-     *     segments: [[80, 50], [420, 50]],
-     *     strokeColor: 'black',
-     *     strokeWidth: 20,
-     *     selected: true
-     * });
-     *
-     * // Set the stroke cap of the line to be round:
-     * line.strokeCap = 'round';
-     *
-     * // Copy the path and set its stroke cap to be square:
-     * var line2 = line.clone();
-     * line2.position.y += 50;
-     * line2.strokeCap = 'square';
-     *
-     * // Make another copy and set its stroke cap to be butt:
-     * var line2 = line.clone();
-     * line2.position.y += 100;
-     * line2.strokeCap = 'butt';
-     */
-
-    /**
-     * The shape to be used at the segments and corners of {@link Path} items
-     * when they have a stroke.
-     *
-     * @name Item#strokeJoin
-     * @property
-     * @type String
-     * @values 'miter', 'round', 'bevel'
-     * @default 'miter'
-     *
-     * @example {@paperscript height=120}
-     * // A look at the different stroke joins:
-     * var path = new Path({
-     *     segments: [[80, 100], [120, 40], [160, 100]],
-     *     strokeColor: 'black',
-     *     strokeWidth: 20,
-     *     // Select the path, in order to see where the stroke is formed:
-     *     selected: true
-     * });
-     *
-     * var path2 = path.clone();
-     * path2.position.x += path2.bounds.width * 1.5;
-     * path2.strokeJoin = 'round';
-     *
-     * var path3 = path2.clone();
-     * path3.position.x += path3.bounds.width * 1.5;
-     * path3.strokeJoin = 'bevel';
-     */
-
-    /**
-     * The dash offset of the stroke.
-     *
-     * @name Item#dashOffset
-     * @property
-     * @type Number
-     * @default 0
-     */
-
-    /**
-     * Specifies whether the stroke is to be drawn taking the current affine
-     * transformation into account (the default behavior), or whether it should
-     * appear as a non-scaling stroke.
-     *
-     * @name Item#strokeScaling
-     * @property
-     * @type Boolean
-     * @default true
-     */
-
-    /**
-     * Specifies an array containing the dash and gap lengths of the stroke.
-     *
-     * @example {@paperscript}
-     * var path = new Path.Circle({
-     *     center: [80, 50],
-     *     radius: 40,
-     *     strokeWidth: 2,
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Set the dashed stroke to [10pt dash, 4pt gap]:
-     * path.dashArray = [10, 4];
-     *
-     * @name Item#dashArray
-     * @property
-     * @type Array
-     * @default []
-     */
-
-    /**
-     * The miter limit of the stroke.
-     * When two line segments meet at a sharp angle and miter joins have been
-     * specified for {@link Item#strokeJoin}, it is possible for the miter to
-     * extend far beyond the {@link Item#strokeWidth} of the path. The
-     * miterLimit imposes a limit on the ratio of the miter length to the
-     * {@link Item#strokeWidth}.
-     *
-     * @name Item#miterLimit
-     * @property
-     * @type Number
-     * @default 10
-     */
-
-    /**
-     * {@grouptitle Fill Style}
-     *
-     * The fill color of the item.
-     *
-     * @name Item#fillColor
-     * @property
-     * @type Color
-     *
-     * @example {@paperscript}
-     * // Setting the fill color of a path to red:
-     *
-     * // Create a circle shaped path at { x: 80, y: 50 }
-     * // with a radius of 35:
-     * var circle = new Path.Circle({
-     *     center: [80, 50],
-     *     radius: 35
-     * });
-     *
-     * // Set the fill color of the circle to RGB red:
-     * circle.fillColor = new Color(1, 0, 0);
-     */
-
-    /**
-     * The fill-rule with which the shape gets filled. Please note that only
-     * modern browsers support fill-rules other than `'nonzero'`.
-     *
-     * @name Item#fillRule
-     * @property
-     * @type String
-     * @values 'nonzero', 'evenodd'
-     * @default 'nonzero'
-     */
-
-    /**
-     * {@grouptitle Shadow Style}
-     *
-     * The shadow color.
-     *
-     * @property
-     * @name Item#shadowColor
-     * @type Color
-     *
-     * @example {@paperscript}
-     * // Creating a circle with a black shadow:
-     *
-     * var circle = new Path.Circle({
-     *     center: [80, 50],
-     *     radius: 35,
-     *     fillColor: 'white',
-     *     // Set the shadow color of the circle to RGB black:
-     *     shadowColor: new Color(0, 0, 0),
-     *     // Set the shadow blur radius to 12:
-     *     shadowBlur: 12,
-     *     // Offset the shadow by { x: 5, y: 5 }
-     *     shadowOffset: new Point(5, 5)
-     * });
-     */
-
-    /**
-     * The shadow's blur radius.
-     *
-     * @property
-     * @name Item#shadowBlur
-     * @type Number
-     * @default 0
-     */
-
-    /**
-     * The shadow's offset.
-     *
-     * @property
-     * @name Item#shadowOffset
-     * @type Point
-     * @default 0
-     */
-
-    // TODO: Find a better name than selectedColor. It should also be used for
-    // guides, etc.
-    /**
-     * {@grouptitle Selection Style}
-     *
-     * The color the item is highlighted with when selected. If the item does
-     * not specify its own color, the color defined by its layer is used instead.
-     *
-     * @name Item#selectedColor
-     * @property
-     * @type Color
-     */
 }, Base.each(['rotate', 'scale', 'shear', 'skew'], function(key) {
     var rotate = key === 'rotate';
     this[key] = function(/* value, center */) {
@@ -3342,18 +2992,11 @@ new function() { // Injection scope for hit-test functions shared with project
                     _applyRecursively, _setApplyMatrix)) {
             // When the _matrix could be applied, we also need to transform
             // color styles (only gradients so far) and pivot point:
-            var pivot = this._pivot,
-                style = this._style,
+            var pivot = this._pivot
                 // pass true for _dontMerge so we don't recursively transform
-                // styles on groups' children.
-                fillColor = style.getFillColor(true),
-                strokeColor = style.getStrokeColor(true);
             if (pivot)
                 _matrix._transformPoint(pivot, pivot, true);
-            if (fillColor)
-                fillColor.transform(_matrix);
-            if (strokeColor)
-                strokeColor.transform(_matrix);
+           
             // Reset the internal matrix to the identity transformation if it
             // was possible to apply it.
             _matrix.reset(true);
@@ -4044,63 +3687,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * the specified type}
      */
 
-    /**
-     * Private method that sets Path related styles on the canvas context.
-     * Not defined in Path as it is required by other classes too,
-     * e.g. PointText.
-     */
-    _setStyles: function(ctx, param, viewMatrix) {
-        // We can access internal properties since we're only using this on
-        // items without children, where styles would be merged.
-        var style = this._style;
-        if (style.hasFill()) {
-            ctx.fillStyle = style.getFillColor().toCanvasStyle(ctx);
-        }
-        if (style.hasStroke()) {
-            ctx.strokeStyle = style.getStrokeColor().toCanvasStyle(ctx);
-            ctx.lineWidth = style.getStrokeWidth();
-            var strokeJoin = style.getStrokeJoin(),
-                strokeCap = style.getStrokeCap(),
-                miterLimit = style.getMiterLimit();
-            if (strokeJoin)
-                ctx.lineJoin = strokeJoin;
-            if (strokeCap)
-                ctx.lineCap = strokeCap;
-            if (miterLimit)
-                ctx.miterLimit = miterLimit;
-            if (paper.support.nativeDash) {
-                var dashArray = style.getDashArray(),
-                    dashOffset = style.getDashOffset();
-                if (dashArray && dashArray.length) {
-                    if ('setLineDash' in ctx) {
-                        ctx.setLineDash(dashArray);
-                        ctx.lineDashOffset = dashOffset;
-                    } else {
-                        ctx.mozDash = dashArray;
-                        ctx.mozDashOffset = dashOffset;
-                    }
-                }
-            }
-        }
-        if (style.hasShadow()) {
-            // In Canvas, shadows unfortunately ignore all transformations
-            // completely. As almost no browser supports ctx.currentTransform,
-            // we need to calculate our own here, and then use it to transform
-            // the shadow-blur and offset accordingly.
-            var pixelRatio = param.pixelRatio || 1,
-                mx = viewMatrix._shiftless().prepend(
-                    new Matrix().scale(pixelRatio, pixelRatio)),
-                // Transform the blur value as a vector and use its new length:
-                blur = mx.transform(new Point(style.getShadowBlur(), 0)),
-                offset = mx.transform(this.getShadowOffset());
-            ctx.shadowColor = style.getShadowColor().toCanvasStyle(ctx);
-            ctx.shadowBlur = blur.getLength();
-            ctx.shadowOffsetX = offset.x;
-            ctx.shadowOffsetY = offset.y;
-        }
-    },
-
-    draw: function(ctx, param, parentStrokeMatrix) {
+    /*draw: function(ctx, param, parentStrokeMatrix) {
         // Each time the project gets drawn, it's _updateVersion is increased.
         // Keep the _updateVersion of drawn items in sync, so we have an easy
         // way to know for which selected items we need to draw selection info.
@@ -4238,7 +3825,7 @@ new function() { // Injection scope for hit-test functions shared with project
             // Restore previous offset.
             param.offset = prevOffset;
         }
-    },
+    },*/
 
     /**
      * Checks the _updateVersion of the item to see if it got drawn in the draw
@@ -4264,63 +3851,6 @@ new function() { // Injection scope for hit-test functions shared with project
         return updated;
     },
 
-    _drawSelection: function(ctx, matrix, size, selectionItems, updateVersion) {
-        var selection = this._selection,
-            itemSelected = selection & /*#=*/ItemSelection.ITEM,
-            boundsSelected = selection & /*#=*/ItemSelection.BOUNDS
-                    || itemSelected && this._selectBounds,
-            positionSelected = selection & /*#=*/ItemSelection.POSITION;
-        if (!this._drawSelected)
-            itemSelected = false;
-        if ((itemSelected || boundsSelected || positionSelected)
-                && this._isUpdated(updateVersion)) {
-            // Allow definition of selected color on a per item and per
-            // layer level, with a fallback to #009dec
-            var layer,
-                color = this.getSelectedColor(true) || (layer = this.getLayer())
-                    && layer.getSelectedColor(true),
-                mx = matrix.appended(this.getGlobalMatrix(true)),
-                half = size / 2;
-            ctx.strokeStyle = ctx.fillStyle = color
-                    ? color.toCanvasStyle(ctx) : '#009dec';
-            if (itemSelected)
-                this._drawSelected(ctx, mx, selectionItems);
-            if (positionSelected) {
-                var point = this.getPosition(true),
-                    x = point.x,
-                    y = point.y;
-                ctx.beginPath();
-                ctx.arc(x, y, half, 0, Math.PI * 2, true);
-                ctx.stroke();
-                var deltas = [[0, -1], [1, 0], [0, 1], [-1, 0]],
-                    start = half,
-                    end = size + 1;
-                for (var i = 0; i < 4; i++) {
-                    var delta = deltas[i],
-                        dx = delta[0],
-                        dy = delta[1];
-                    ctx.moveTo(x + dx * start, y + dy * start);
-                    ctx.lineTo(x + dx * end, y + dy * end);
-                    ctx.stroke();
-                }
-            }
-            if (boundsSelected) {
-                var coords = mx._transformCorners(this.getInternalBounds());
-                // Now draw a rectangle that connects the transformed
-                // bounds corners, and draw the corners.
-                ctx.beginPath();
-                for (var i = 0; i < 8; i++) {
-                    ctx[!i ? 'moveTo' : 'lineTo'](coords[i], coords[++i]);
-                }
-                ctx.closePath();
-                ctx.stroke();
-                for (var i = 0; i < 8; i++) {
-                    ctx.fillRect(coords[i] - half, coords[++i] - half,
-                            size, size);
-                }
-            }
-        }
-    },
 
     _canComposite: function() {
         return false;

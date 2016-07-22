@@ -51,7 +51,6 @@ var paper = function(self, undefined) {
 // var Point = Base.extend(...);
 
 /*#*/ include('basic/Point.js');
-/*#*/ include('basic/Size.js');
 /*#*/ include('basic/Rectangle.js');
 /*#*/ include('basic/Matrix.js');
 /*#*/ include('basic/Line.js');
@@ -61,10 +60,8 @@ var paper = function(self, undefined) {
 /*#*/ include('item/Group.js');
 /*#*/ include('item/Layer.js');
 /*#*/ include('item/Shape.js');
-/*#*/ include('item/Raster.js');
 /*#*/ include('item/SymbolItem.js');
 /*#*/ include('item/SymbolDefinition.js');
-/*#*/ include('item/HitResult.js');
 
 /*#*/ include('path/Segment.js');
 /*#*/ include('path/SegmentPoint.js');
@@ -77,48 +74,16 @@ var paper = function(self, undefined) {
 /*#*/ if (__options.booleanOperations) {
 /*#*/     include('path/PathItem.Boolean.js');
 /*#*/ }
-/*#*/ include('path/PathIterator.js');
-/*#*/ include('path/PathFitter.js');
-
-/*#*/ include('text/TextItem.js');
-/*#*/ include('text/PointText.js');
-
-/*#*/ include('style/Color.js');
-/*#*/ include('style/Gradient.js');
-/*#*/ include('style/GradientStop.js');
-/*#*/ include('style/Style.js');
 
 /*#*/ include('dom/DomElement.js');
-/*#*/ include('dom/DomEvent.js');
-
-/*#*/ include('view/View.js');
-/*#*/ include('view/CanvasView.js');
-
-/*#*/ include('event/Event.js');
-/*#*/ include('event/KeyEvent.js');
-/*#*/ include('event/Key.js');
-/*#*/ include('event/MouseEvent.js');
-
-/*#*/ include('tool/ToolEvent.js');
-/*#*/ include('tool/Tool.js');
-
-/*#*/ include('net/Http.js');
 
 /*#*/ include('canvas/CanvasProvider.js');
-/*#*/ include('canvas/BlendMode.js');
-/*#*/ if (__options.load) {
-/*#*/     include('canvas/ProxyContext.js');
-/*#*/ }
 
 /*#*/ if (__options.svg) {
 /*#*/     include('svg/SvgElement.js');
 /*#*/     include('svg/SvgStyles.js');
 /*#*/     include('svg/SvgExport.js');
 /*#*/     include('svg/SvgImport.js');
-/*#*/ }
-
-/*#*/ if (__options.paperScript) {
-/*#*/     include('core/PaperScript.js');
 /*#*/ }
 
 /*#*/ include('export.js');

@@ -55,9 +55,7 @@ PathItem.inject(new function() {
                 .transform(null, true, true);
         if (closed)
             res.setClosed(true);
-        return closed
-            ? res.resolveCrossings().reorient(res.getFillRule() === 'nonzero')
-            : res;
+        return res;
     }
 
     function createResult(ctor, paths, reduce, path1, path2) {

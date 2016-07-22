@@ -268,58 +268,6 @@ new function() {
         PointText: exportText
     };
 
-    function applyStyle(item, node, isRoot) {
-        var attrs = {},
-            parent = !isRoot && item.getParent(),
-            style = [];
-
-        if (item._name != null)
-            attrs.id = item._name;
-
-        Base.each(SvgStyles, function(entry) {
-            // Get a given style only if it differs from the value on the parent
-            // (A layer or group which can have style values in SVG).
-            var get = entry.get,
-                type = entry.type,
-                value = item[get]();
-            if (entry.exportFilter
-                    ? entry.exportFilter(item, value)
-                    : !parent || !Base.equals(parent[get](), value)) {
-                if (type === 'color' && value != null) {
-                    // Support for css-style rgba() values is not in SVG 1.1, so
-                    // separate the alpha value of colors with alpha into the
-                    // separate fill- / stroke-opacity attribute:
-                    var alpha = value.getAlpha();
-                    if (alpha < 1)
-                        attrs[entry.attribute + '-opacity'] = alpha;
-                }
-                if (type === 'style') {
-                    style.push(entry.attribute + ': ' + value);
-                } else {
-                    attrs[entry.attribute] = value == null ? 'none'
-                            : type === 'color' ? value.gradient
-                                // true for noAlpha, see above
-                                ? exportGradient(value, item)
-                                : value.toCSS(true)
-                            : type === 'array' ? value.join(',')
-                            : type === 'lookup' ? entry.toSVG[value]
-                            : value;
-                }
-            }
-        });
-
-        if (style.length)
-            attrs.style = style.join(';');
-
-        if (attrs.opacity === 1)
-            delete attrs.opacity;
-
-        if (!item._visible)
-            attrs.visibility = 'hidden';
-
-        return SvgElement.set(node, attrs, formatter);
-    }
-
     var definitions;
     function getDefinition(item, type) {
         if (!definitions)
@@ -386,7 +334,7 @@ new function() {
             if (data && data !== '{}' && data !== 'null')
                 node.setAttribute('data-paper-data', data);
         }
-        return node && applyStyle(item, node, isRoot);
+        return node
     }
 
     function setOptions(options) {

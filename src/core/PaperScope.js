@@ -68,7 +68,7 @@ var PaperScope = Base.extend(/** @lends PaperScope# */{
             var ctx = CanvasProvider.getContext(1, 1) || {};
             proto.support = {
                 nativeDash: 'setLineDash' in ctx || 'mozDash' in ctx,
-                nativeBlendModes: BlendMode.nativeModes
+                //nativeBlendModes: BlendMode.nativeModes
             };
             CanvasProvider.release(ctx);
         }
