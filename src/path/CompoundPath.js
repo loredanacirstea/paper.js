@@ -286,55 +286,7 @@ var CompoundPath = PathItem.extend(/** @lends CompoundPath# */{
         }
         return paths.join('');
     }
-}, /** @lends CompoundPath# */{
-    _hitTestChildren: function _hitTestChildren(point, options, viewMatrix) {
-        return _hitTestChildren.base.call(this, point,
-                // If we're not specifically asked to returns paths through
-                // options.class == Path, do not test children for fill, since a
-                // compound path forms one shape.
-                // Also support legacy format `type: 'path'`.
-                options.class === Path || options.type === 'path' ? options
-                    : Base.set({}, options, { fill: false }),
-                viewMatrix);
-    },
-
-    _draw: function(ctx, param, viewMatrix, strokeMatrix) {
-        var children = this._children;
-        // Return early if the compound path doesn't have any children:
-        if (!children.length)
-            return;
-
-        param = param.extend({ dontStart: true, dontFinish: true });
-        ctx.beginPath();
-        for (var i = 0, l = children.length; i < l; i++)
-            children[i].draw(ctx, param, strokeMatrix);
-
-        if (!param.clip) {
-            this._setStyles(ctx, param, viewMatrix);
-            var style = this._style;
-            if (style.hasFill()) {
-                ctx.fill(style.getFillRule());
-                ctx.shadowColor = 'rgba(0,0,0,0)';
-            }
-            if (style.hasStroke())
-                ctx.stroke();
-        }
-    },
-
-    _drawSelected: function(ctx, matrix, selectionItems) {
-        var children = this._children;
-        for (var i = 0, l = children.length; i < l; i++) {
-            var child = children[i],
-                mx = child._matrix;
-            // Do not draw this child now if it's separately marked as selected,
-            // as it would be drawn twice otherwise.
-            if (!selectionItems[child._id]) {
-                child._drawSelected(ctx, mx.isIdentity() ? matrix
-                        : matrix.appended(mx));
-            }
-        }
-    }
-},
+}, 
 new function() { // Injection scope for PostScript-like drawing functions
     /**
      * Helper method that returns the current path and checks if a moveTo()

@@ -127,11 +127,6 @@ var Curve = Base.extend(/** @lends Curve# */{
                 options, true, dictionary);
     },
 
-    _changed: function() {
-        // Clear cached values.
-        this._length = this._bounds = undefined;
-    },
-
     /**
      * Returns a copy of the curve.
      *
@@ -502,7 +497,7 @@ var Curve = Base.extend(/** @lends Curve# */{
             } else {
                 // otherwise create it from the result of split
                 this._segment2 = segment;
-                this._changed();
+
                 res = new Curve(segment, segment2);
             }
         }

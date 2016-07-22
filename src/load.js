@@ -36,7 +36,6 @@ if (typeof window === 'object') {
         // the code the 2nd time around.
         load(root + 'src/load.js');
     } else {
-        include('options.js');
         // Load constants.js, required by the on-the-fly preprocessing:
         include('constants.js');
         // Automatically load stats.js while developing.

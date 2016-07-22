@@ -34,21 +34,15 @@
 // parameter inside the paper scope.
 var paper = function(self, undefined) {
 /*#*/ include('init.js');
-// Inline Straps.js core (the Base class) inside the paper scope first:
 /*#*/ include('../node_modules/straps/straps.js');
 
 /*#*/ include('core/Base.js');
 /*#*/ include('core/Emitter.js');
 /*#*/ include('core/PaperScope.js');
-/*#*/ include('core/PaperScopeItem.js');
 
 /*#*/ include('util/Formatter.js');
 /*#*/ include('util/Numerical.js');
 /*#*/ include('util/UID.js');
-
-// Include Paper classes, which are later injected into PaperScope by setting
-// them on the 'this' object, e.g.:
-// var Point = Base.extend(...);
 
 /*#*/ include('basic/Point.js');
 /*#*/ include('basic/Rectangle.js');
@@ -58,10 +52,6 @@ var paper = function(self, undefined) {
 /*#*/ include('item/Project.js');
 /*#*/ include('item/Item.js');
 /*#*/ include('item/Group.js');
-/*#*/ include('item/Layer.js');
-/*#*/ include('item/Shape.js');
-/*#*/ include('item/SymbolItem.js');
-/*#*/ include('item/SymbolDefinition.js');
 
 /*#*/ include('path/Segment.js');
 /*#*/ include('path/SegmentPoint.js');
@@ -69,22 +59,10 @@ var paper = function(self, undefined) {
 /*#*/ include('path/CurveLocation.js');
 /*#*/ include('path/PathItem.js');
 /*#*/ include('path/Path.js');
-/*#*/ include('path/Path.Constructors.js');
 /*#*/ include('path/CompoundPath.js');
-/*#*/ if (__options.booleanOperations) {
 /*#*/     include('path/PathItem.Boolean.js');
-/*#*/ }
-
-/*#*/ include('dom/DomElement.js');
-
-/*#*/ include('canvas/CanvasProvider.js');
-
-/*#*/ if (__options.svg) {
 /*#*/     include('svg/SvgElement.js');
-/*#*/     include('svg/SvgStyles.js');
 /*#*/     include('svg/SvgExport.js');
-/*#*/     include('svg/SvgImport.js');
-/*#*/ }
 
 /*#*/ include('export.js');
 return paper;

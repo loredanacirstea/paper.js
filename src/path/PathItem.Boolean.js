@@ -64,12 +64,7 @@ PathItem.inject(new function() {
         // See if the item can be reduced to just a simple Path.
         if (reduce)
             result = result.reduce({ simplify: true });
-        // Insert the resulting path above whichever of the two paths appear
-        // further up in the stack.
-        result.insertAbove(path2 && path1.isSibling(path2)
-                && path1.getIndex() < path2.getIndex() ? path2 : path1);
-        // Copy over the input path attributes, excluding matrix and we're done.
-        result.copyAttributes(path1, true);
+
         return result;
     }
 

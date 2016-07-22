@@ -50,7 +50,6 @@ var SegmentPoint = Point.extend({
     _set: function(x, y) {
         this._x = x;
         this._y = y;
-        this._owner._changed(this);
         return this;
     },
 
@@ -60,7 +59,6 @@ var SegmentPoint = Point.extend({
 
     setX: function(x) {
         this._x = x;
-        this._owner._changed(this);
     },
 
     getY: function() {
@@ -69,7 +67,6 @@ var SegmentPoint = Point.extend({
 
     setY: function(y) {
         this._y = y;
-        this._owner._changed(this);
     },
 
     isZero: function() {

@@ -20,76 +20,8 @@ Base.inject(/** @lends Base# */{
     /**
      * Renders base objects to strings in object literal notation.
      */
-    toString: function() {
-        return this._id != null
-            ?  (this._class || 'Object') + (this._name
-                ? " '" + this._name + "'"
-                : ' @' + this._id)
-            : '{ ' + Base.each(this, function(value, key) {
-                // Hide internal properties even if they are enumerable
-                if (!/^_/.test(key)) {
-                    var type = typeof value;
-                    this.push(key + ': ' + (type === 'number'
-                            ? Formatter.instance.number(value)
-                            : type === 'string' ? "'" + value + "'" : value));
-                }
-            }, []).join(', ') + ' }';
-    },
 
-    /**
-     * The class name of the object as a string, if the prototype defines a
-     * `_class` value.
-     *
-     * @bean
-     */
-    getClassName: function() {
-        return this._class || '';
-    },
 
-    /**
-     * Imports (deserializes) the stored JSON data into the object, if the
-     * classes match. If they do not match, a newly created object is returned
-     * instead.
-     *
-     * @param {String} json the JSON data to import from
-     */
-    importJSON: function(json) {
-        return Base.importJSON(json, this);
-    },
-
-    /**
-     * Exports (serializes) this object to a JSON data object or string.
-     *
-     * @option [options.asString=true] {Boolean} whether the JSON is returned as
-     *     a `Object` or a `String`
-     * @option [options.precision=5] {Number} the amount of fractional digits in
-     *     numbers used in JSON data
-     *
-     * @param {Object} [options] the serialization options
-     * @return {String} the exported JSON data
-     */
-    exportJSON: function(options) {
-        return Base.exportJSON(this, options);
-    },
-
-    // To support JSON.stringify:
-    toJSON: function() {
-        return Base.serialize(this);
-    },
-
-    /**
-     * #_set() is part of the mechanism for constructors which take one object
-     * literal describing all the properties to be set on the created instance.
-     * Through {@link Base.filter()} it supports `_filtered`
-     * handling as required by the {@link Base.readNamed()} mechanism.
-     *
-     * @param {Object} props an object describing the properties to set
-     * @return {Boolean} {@true if the object is a plain object}
-     */
-    _set: function(props) {
-        if (props && Base.isPlainObject(props))
-            return Base.filter(this, props);
-    },
 
     statics: /** @lends Base */{
 
@@ -497,44 +429,7 @@ Base.inject(/** @lends Base# */{
             return hasDictionary ? res[1] : res;
         },
 
-        exportJSON: function(obj, options) {
-            var json = Base.serialize(obj, options);
-            return options && options.asString === false
-                    ? json
-                    : JSON.stringify(json);
-        },
-
-        importJSON: function(json, target) {
-            return Base.deserialize(
-                    typeof json === 'string' ? JSON.parse(json) : json,
-                    // Provide our own create function to handle target and
-                    // insertion.
-                    function(ctor, args, isRoot) {
-                        // If a target is provided and its of the right type
-                        // for the root item, import right into it.
-                        var useTarget = isRoot && target
-                                && target.constructor === ctor,
-                            obj = useTarget ? target
-                                : Base.create(ctor.prototype);
-                        // NOTE: We don't set insert false for layers since we
-                        // want these to be created on the fly in the active
-                        // project into which we're importing (except for if
-                        // it's a preexisting target layer).
-                        if (args.length === 1 && obj instanceof Item
-                                && (useTarget || !(obj instanceof Layer))) {
-                            var arg = args[0];
-                            if (Base.isPlainObject(arg))
-                                arg.insert = false;
-                        }
-                        // When reusing an object, initialize it through #set()
-                        // instead of the constructor function:
-                        (useTarget ? obj.set : ctor).apply(obj, args);
-                        // Clear target to only use it once.
-                        if (useTarget)
-                            target = null;
-                        return obj;
-                    });
-        },
+   
 
         /**
          * Utility function for adding and removing items from a list of which

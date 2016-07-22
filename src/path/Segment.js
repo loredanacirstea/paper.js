@@ -160,32 +160,6 @@ var Segment = Base.extend(/** @lends Segment# */{
         return Base.serialize(obj, options, true, dictionary);
     },
 
-    _changed: function(point) {
-        var path = this._path;
-        if (!path)
-            return;
-        // Delegate changes to affected curves if they exist.
-        var curves = path._curves,
-            index = this._index,
-            curve;
-        if (curves) {
-            // Updated the neighboring affected curves, depending on which point
-            // is changing.
-            // TODO: Consider exposing these curves too, through #curveIn,
-            // and #curveOut, next to #curve?
-            if ((!point || point === this._point || point === this._handleIn)
-                    && (curve = index > 0 ? curves[index - 1] : path._closed
-                        ? curves[curves.length - 1] : null))
-                curve._changed();
-            // No wrap around needed for outgoing curve, as only closed paths
-            // will have one for the last segment.
-            if ((!point || point === this._point || point === this._handleOut)
-                    && (curve = curves[index]))
-                curve._changed();
-        }
-        path._changed(/*#=*/Change.SEGMENTS);
-    },
-
     /**
      * The anchor point of the segment.
      *
@@ -270,7 +244,6 @@ var Segment = Base.extend(/** @lends Segment# */{
             path._updateSelection(this, oldSelection, selection);
             // Let path know that we changed something and the view should be
             // redrawn
-            path._changed(/*#=*/Change.ATTRIBUTE);
         }
     },
 
@@ -571,7 +544,6 @@ var Segment = Base.extend(/** @lends Segment# */{
      */
     transform: function(matrix) {
         this._transformCoordinates(matrix, new Array(6), true);
-        this._changed();
     },
 
     /**
@@ -603,7 +575,6 @@ var Segment = Base.extend(/** @lends Segment# */{
         this._handleOut._set(
                 u * handleOut1._x + v * handleOut2._x,
                 u * handleOut1._y + v * handleOut2._y, true);
-        this._changed();
     },
 
     _transformCoordinates: function(matrix, coords, change) {
