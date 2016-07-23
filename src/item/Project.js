@@ -56,7 +56,7 @@ var Project = PaperScopeItem.extend(/** @lends Project# */{
         this._children = [];
         this._namedChildren = {};
         this._activeLayer = null;
-        this._currentStyle = new Style(null, null, this);
+        //this._currentStyle = new Style(null, null, this);
         // If no view is provided, we create a 1x1 px canvas view just so we
         // have something to do size calculations with.
         // (e.g. PointText#_getBounds)
@@ -187,12 +187,12 @@ var Project = PaperScopeItem.extend(/** @lends Project# */{
      * var path2 = new Path.Circle(new Point(175, 50), 20);
      */
     getCurrentStyle: function() {
-        return this._currentStyle;
+        //return this._currentStyle;
     },
 
     setCurrentStyle: function(style) {
         // TODO: Style selected items with the style:
-        this._currentStyle.set(style);
+        //this._currentStyle.set(style);
     },
 
     /**

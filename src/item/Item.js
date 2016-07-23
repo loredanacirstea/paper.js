@@ -149,7 +149,7 @@ new function() { // Injection scope for various item event handlers
         if (point)
             matrix.translate(point);
         matrix._owner = this;
-        this._style = new Style(project._currentStyle, this, project);
+        //this._style = new Style(project._currentStyle, this, project);
         // Do not add to the project if it's an internal path,  or if
         // props.insert  or settings.isnertItems is false.
         if (internal || hasProps && props.insert === false
@@ -195,8 +195,8 @@ new function() { // Injection scope for various item event handlers
         // Serialize style fields, but only if they differ from defaults.
         // Do not serialize styles on Groups and Layers, since they just unify
         // their children's own styles.
-        if (!(this instanceof Group))
-            serialize(this._style._defaults);
+        //if (!(this instanceof Group))
+        //    serialize(this._style._defaults);
         // There is no compact form for Item serialization, we always keep the
         // class.
         return [ this._class, props ];
@@ -396,13 +396,13 @@ new function() { // Injection scope for various item event handlers
      * path2.style = myStyle;
      */
     getStyle: function() {
-        return this._style;
+        //return this._style;
     },
 
     setStyle: function(style) {
         // Don't access _style directly so Path#getStyle() can be overridden for
         // CompoundPaths.
-        this.getStyle().set(style);
+        //this.getStyle().set(style);
     }
 }, Base.each(['locked', 'visible', 'blendMode', 'opacity', 'guide'],
     // Produce getter/setters for properties. We need setters because we want to
@@ -1437,7 +1437,7 @@ new function() { // Injection scope for various item event handlers
         // NOTE: We do not compare name and selected state.
         // TODO: Consider not comparing locked and visible also?
         return item === this || item && this._class === item._class
-                && this._style.equals(item._style)
+                //&& this._style.equals(item._style)
                 && this._matrix.equals(item._matrix)
                 && this._locked === item._locked
                 && this._visible === item._visible
@@ -1551,7 +1551,7 @@ new function() { // Injection scope for various item event handlers
      */
     copyAttributes: function(source, excludeMatrix) {
         // Copy over style
-        this.setStyle(source._style);
+        //this.setStyle(source._style);
         // Only copy over these fields if they are actually defined in 'source',
         // meaning the default value has been overwritten (default is on
         // prototype).
@@ -2705,7 +2705,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * @return {Boolean} {@true if the item has a fill}
      */
     hasFill: function() {
-        return this.getStyle().hasFill();
+        //return this.getStyle().hasFill();
     },
 
     /**
@@ -2714,7 +2714,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * @return {Boolean} {@true if the item has a stroke}
      */
     hasStroke: function() {
-        return this.getStyle().hasStroke();
+        //return this.getStyle().hasStroke();
     },
 
     /**
@@ -2723,7 +2723,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * @return {Boolean} {@true if the item has a shadow}
      */
     hasShadow: function() {
-        return this.getStyle().hasShadow();
+        //return this.getStyle().hasShadow();
     },
 
     /**
@@ -3342,12 +3342,12 @@ new function() { // Injection scope for hit-test functions shared with project
                     _applyRecursively, _setApplyMatrix)) {
             // When the _matrix could be applied, we also need to transform
             // color styles (only gradients so far) and pivot point:
-            var pivot = this._pivot,
-                style = this._style,
+            var pivot = this._pivot
+                //style = this._style,
                 // pass true for _dontMerge so we don't recursively transform
                 // styles on groups' children.
-                fillColor = style.getFillColor(true),
-                strokeColor = style.getStrokeColor(true);
+                //fillColor = style.getFillColor(true),
+                //strokeColor = style.getStrokeColor(true);
             if (pivot)
                 _matrix._transformPoint(pivot, pivot, true);
             if (fillColor)
@@ -4049,7 +4049,7 @@ new function() { // Injection scope for hit-test functions shared with project
      * Not defined in Path as it is required by other classes too,
      * e.g. PointText.
      */
-    _setStyles: function(ctx, param, viewMatrix) {
+    /*_setStyles: function(ctx, param, viewMatrix) {
         // We can access internal properties since we're only using this on
         // items without children, where styles would be merged.
         var style = this._style;
@@ -4099,7 +4099,7 @@ new function() { // Injection scope for hit-test functions shared with project
             ctx.shadowOffsetY = offset.y;
         }
     },
-
+*/
     draw: function(ctx, param, parentStrokeMatrix) {
         // Each time the project gets drawn, it's _updateVersion is increased.
         // Keep the _updateVersion of drawn items in sync, so we have an easy
@@ -4281,8 +4281,8 @@ new function() { // Injection scope for hit-test functions shared with project
                     && layer.getSelectedColor(true),
                 mx = matrix.appended(this.getGlobalMatrix(true)),
                 half = size / 2;
-            ctx.strokeStyle = ctx.fillStyle = color
-                    ? color.toCanvasStyle(ctx) : '#009dec';
+            //ctx.strokeStyle = ctx.fillStyle = color
+            //        ? color.toCanvasStyle(ctx) : '#009dec';
             if (itemSelected)
                 this._drawSelected(ctx, mx, selectionItems);
             if (positionSelected) {

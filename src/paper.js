@@ -60,8 +60,7 @@ var paper = function(self, undefined) {
 /*#*/ include('item/Item.js');
 /*#*/ include('item/Group.js');
 /*#*/ include('item/Layer.js');
-/*#*/ include('item/Shape.js');
-/*#*/ include('item/Raster.js');
+
 /*#*/ include('item/SymbolItem.js');
 /*#*/ include('item/SymbolDefinition.js');
 /*#*/ include('item/HitResult.js');
@@ -77,16 +76,6 @@ var paper = function(self, undefined) {
 /*#*/ if (__options.booleanOperations) {
 /*#*/     include('path/PathItem.Boolean.js');
 /*#*/ }
-/*#*/ include('path/PathIterator.js');
-/*#*/ include('path/PathFitter.js');
-
-/*#*/ include('text/TextItem.js');
-/*#*/ include('text/PointText.js');
-
-/*#*/ include('style/Color.js');
-/*#*/ include('style/Gradient.js');
-/*#*/ include('style/GradientStop.js');
-/*#*/ include('style/Style.js');
 
 /*#*/ include('dom/DomElement.js');
 /*#*/ include('dom/DomEvent.js');
@@ -110,12 +99,8 @@ var paper = function(self, undefined) {
 /*#*/     include('canvas/ProxyContext.js');
 /*#*/ }
 
-/*#*/ if (__options.svg) {
-/*#*/     include('svg/SvgElement.js');
-/*#*/     include('svg/SvgStyles.js');
-/*#*/     include('svg/SvgExport.js');
-/*#*/     include('svg/SvgImport.js');
-/*#*/ }
+/*#*/ include('svg/SvgExport.js');
+
 
 /*#*/ if (__options.paperScript) {
 /*#*/     include('core/PaperScript.js');

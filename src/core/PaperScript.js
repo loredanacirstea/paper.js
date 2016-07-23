@@ -52,7 +52,7 @@ Base.exports.PaperScript = function() {
     );
     Point.inject(fields);
     Size.inject(fields);
-    Color.inject(fields);
+    //Color.inject(fields);
 
     // Use very short name for the binary operator (__$__) as well as the
     // unary operator ($__), as operations will be replaced with then.
