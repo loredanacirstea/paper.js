@@ -40,52 +40,7 @@ Base.inject(/** @lends Base# */{
             return res;
         },
 
-        /**
-         * Checks if two values or objects are equals to each other, by using
-         * their equals() methods if available, and also comparing elements of
-         * arrays and properties of objects.
-         */
-        equals: function(obj1, obj2) {
-            if (obj1 === obj2)
-                return true;
-            // Call #equals() on both obj1 and obj2
-            if (obj1 && obj1.equals)
-                return obj1.equals(obj2);
-            if (obj2 && obj2.equals)
-                return obj2.equals(obj1);
-            // Deep compare objects or arrays
-            if (obj1 && obj2
-                    && typeof obj1 === 'object' && typeof obj2 === 'object') {
-                // Compare arrays
-                if (Array.isArray(obj1) && Array.isArray(obj2)) {
-                    var length = obj1.length;
-                    if (length !== obj2.length)
-                        return false;
-                    while (length--) {
-                        if (!Base.equals(obj1[length], obj2[length]))
-                            return false;
-                    }
-                } else {
-                    // Deep compare objects.
-                    var keys = Object.keys(obj1),
-                        length = keys.length;
-                    // Ensure that both objects contain the same number of
-                    // properties before comparing deep equality.
-                    if (length !== Object.keys(obj2).length)
-                        return false;
-                    while (length--) {
-                        // Deep compare each member
-                        var key = keys[length];
-                        if (!(obj2.hasOwnProperty(key)
-                                && Base.equals(obj1[key], obj2[key])))
-                            return false;
-                    }
-                }
-                return true;
-            }
-            return false;
-        },
-
+      
         /**
          * When called on a subclass of Base, it reads arguments of the type of
          * the subclass from the passed arguments list or array, at the given
@@ -154,12 +109,7 @@ Base.inject(/** @lends Base# */{
             return list[list.__index = start || list.__index || 0];
         },
 
-        /**
-         * Returns how many arguments remain to be read in the argument list.
-         */
-        remain: function(list) {
-            return list.length - (list.__index || 0);
-        },
+       
 
         /**
          * Reads all readable arguments from the list, handling nested arrays
@@ -187,43 +137,7 @@ Base.inject(/** @lends Base# */{
             return res;
         },
 
-        /**
-         * Allows using of Base.read() mechanism in combination with reading
-         * named arguments form a passed property object literal. Calling
-         * Base.readNamed() can read both from such named properties and normal
-         * unnamed arguments through Base.read(). In use for example for the
-         * various Path.Constructors.
-         *
-         * @param {Array} list the list to read from, either an arguments object
-         *     or a normal array
-         * @param {String} name the property name to read from
-         * @param {Number} start the index at which to start reading in the list
-         * @param {Object} options `options.readNull` controls whether null is
-         *     returned or converted. `options.clone` controls whether passed
-         *     objects should be cloned if they are already provided in the
-         *     required type
-         * @param {Number} amount the amount of elements that can be read
-         */
-        readNamed: function(list, name, start, options, amount) {
-            var value = this.getNamed(list, name),
-                hasObject = value !== undefined;
-            if (hasObject) {
-                // Create a _filtered object that inherits from argument 0, and
-                // override all fields that were already read with undefined.
-                var filtered = list._filtered;
-                if (!filtered) {
-                    filtered = list._filtered = Base.create(list[0]);
-                    // Point _filtering to the original so Base#_set() can
-                    // execute hasOwnProperty on it.
-                    filtered._filtering = list[0];
-                }
-                // delete wouldn't work since the masked parent's value would
-                // shine through.
-                filtered[name] = undefined;
-            }
-            return this.read(hasObject ? [value] : list, start, options, amount);
-        },
-
+       
 
    
 

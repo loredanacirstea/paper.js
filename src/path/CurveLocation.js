@@ -353,26 +353,7 @@ var CurveLocation = Base.extend(/** @lends CurveLocation# */{
         return res;
     },
 
-    /**
-     * @return {String} a string representation of the curve location
-     */
-    toString: function() {
-        var parts = [],
-            point = this.getPoint(),
-            f = Formatter.instance;
-        if (point)
-            parts.push('point: ' + point);
-        var index = this.getIndex();
-        if (index != null)
-            parts.push('index: ' + index);
-        var time = this.getTime();
-        if (time != null)
-            parts.push('time: ' + f.number(time));
-        if (this._distance != null)
-            parts.push('distance: ' + f.number(this._distance));
-        return '{ ' + parts.join(', ') + ' }';
-    },
-
+ 
 
     /**
      * {@grouptitle Tests}

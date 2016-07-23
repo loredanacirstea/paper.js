@@ -20,7 +20,7 @@
  * is unique to their type, but share the underlying properties and functions
  * that they inherit from Item.
  */
-var Item = Base.extend(Emitter, /** @lends Item# */{
+var Item = Base.extend({}, /** @lends Item# */{
     statics: /** @lends Item */{
         /**
          * Override Item.extend() to merge the subclass' _serializeFields with
@@ -50,14 +50,8 @@ var Item = Base.extend(Emitter, /** @lends Item# */{
     // Exceptions are Raster, SymbolItem, Clip and Shape.
     _applyMatrix: true,
     _canApplyMatrix: true,
-    _canScaleStroke: false,
     _pivot: null,
-    _visible: true,
-    _blendMode: 'normal',
-    _opacity: 1,
-    _locked: false,
     _guide: false,
-    _clipMask: false,
     _selection: 0,
     // Controls whether bounds should appear selected when the item is selected.
     // This is only turned off for Group, Layer and PathItem, where it can be
@@ -66,56 +60,6 @@ var Item = Base.extend(Emitter, /** @lends Item# */{
     _selectChildren: false,
     // Provide information about fields to be serialized, with their defaults
     // that can be omitted.
-    _serializeFields: {
-        name: null,
-        applyMatrix: null,
-        matrix: new Matrix(),
-        pivot: null,
-        visible: true,
-        blendMode: 'normal',
-        opacity: 1,
-        locked: false,
-        guide: false,
-        clipMask: false,
-        selected: false,
-        data: {}
-    }
-},
-new function() { // Injection scope for various item event handlers
-    var handlers = ['onMouseDown', 'onMouseUp', 'onMouseDrag', 'onClick',
-            'onDoubleClick', 'onMouseMove', 'onMouseEnter', 'onMouseLeave'];
-    return Base.each(handlers,
-        function(name) {
-            this._events[name] = {
-                install: function(type) {
-                    this.getView()._countItemEvent(type, 1);
-                },
-
-                uninstall: function(type) {
-                    this.getView()._countItemEvent(type, -1);
-                }
-            };
-        }, {
-            _events: {
-                onFrame: {
-                    install: function() {
-                        this.getView()._animateItem(this, true);
-                    },
-
-                    uninstall: function() {
-                        this.getView()._animateItem(this, false);
-                    }
-                },
-
-                // Only for external sources, e.g. Raster
-                onLoad: {},
-                onError: {}
-            },
-            statics: {
-                _itemHandlers: handlers
-            }
-        }
-    );
 }, /** @lends Item# */{
     initialize: function Item() {
         // Do nothing, but declare it for named constructors.
@@ -155,58 +99,8 @@ new function() { // Injection scope for various item event handlers
         return hasProps;
     },
 
-    _serialize: function(options, dictionary) {
-        var props = {},
-            that = this;
 
-        function serialize(fields) {
-            for (var key in fields) {
-                // value is the default value, only serialize if the current
-                // value is different from it.
-                var value = that[key];
-                // Style#leading is a special case, as its default value is
-                // dependent on the fontSize. Handle this here separately.
-                if (!Base.equals(value, key === 'leading'
-                        ? fields.fontSize * 1.2 : fields[key])) {
-                    props[key] = Base.serialize(value, options,
-                            // Do not use compact mode for data
-                            key !== 'data', dictionary);
-                }
-            }
-        }
-
-        // Serialize fields that this Item subclass defines first
-        serialize(this._serializeFields);
-        // Serialize style fields, but only if they differ from defaults.
-        // Do not serialize styles on Groups and Layers, since they just unify
-        // their children's own styles.
-
-        // There is no compact form for Item serialization, we always keep the
-        // class.
-        return [ this._class, props ];
-    },
-
- 
-
-}, Base.each(['locked', 'visible', 'blendMode', 'opacity', 'guide'],
-    // Produce getter/setters for properties. We need setters because we want to
-    // call _changed() if a property was modified.
-    function(name) {
-        var part = Base.capitalize(name),
-            name = '_' + name;
-        this['get' + part] = function() {
-            return this[name];
-        };
-        this['set' + part] = function(value) {
-            if (value != this[name]) {
-                this[name] = value;
-                // #locked does not change appearance, all others do:
-                this._changed(name === '_locked'
-                        ? /*#=*/ChangeFlag.ATTRIBUTE : /*#=*/Change.ATTRIBUTE);
-            }
-        };
-    },
-{}), Base.each({ // Produce getters for bounds properties:
+}, Base.each({ // Produce getters for bounds properties:
         getStrokeBounds: { stroke: true },
         getHandleBounds: { handle: true },
         getInternalBounds: { internal: true }
@@ -247,36 +141,6 @@ new function() { // Injection scope for various item event handlers
                 ? new LinkedRectangle(bounds.x, bounds.y, bounds.width,
                         bounds.height, this, 'setBounds')
                 : bounds;
-    },
-
-    setBounds: function(/* rect */) {
-        var rect = Rectangle.read(arguments),
-            bounds = this.getBounds(),
-            _matrix = this._matrix,
-            matrix = new Matrix(),
-            center = rect.getCenter();
-        // Read this from bottom to top:
-        // Translate to new center:
-        matrix.translate(center);
-        // Scale to new Size, if size changes and avoid divisions by 0:
-        if (rect.width != bounds.width || rect.height != bounds.height) {
-            // If a previous transformation resulted in a non-invertible matrix,
-            // Restore to the last revertible matrix stored in _backup, and get
-            // the bounds again. That way, we can prevent collapsing to 0-size.
-            if (!_matrix.isInvertible()) {
-                _matrix.set(_matrix._backup
-                        || new Matrix().translate(_matrix.getTranslation()));
-                bounds = this.getBounds();
-            }
-            matrix.scale(
-                    bounds.width !== 0 ? rect.width / bounds.width : 0,
-                    bounds.height !== 0 ? rect.height / bounds.height : 0);
-        }
-        // Translate to bounds center:
-        center = bounds.getCenter();
-        matrix.translate(-center.x, -center.y);
-        // Now execute the transformation
-        this.transform(matrix);
     },
 
     /**
@@ -341,19 +205,7 @@ new function() { // Injection scope for various item event handlers
         return bounds;
     },
 
-    /**
-     * Returns to correct matrix to use to transform stroke related geometries
-     * when calculating bounds: the item's matrix if {@link #strokeScaling} is
-     * `true`, otherwise the parent's inverted view matrix. The returned matrix
-     * is always shiftless, meaning its translation vector is reset to zero.
-     */
-    _getStrokeMatrix: function(matrix, options) {
-        var parent = this.getStrokeScaling() ? null
-                : options && options.internal ? this
-                    : this._parent || this._symbol && this._symbol._item,
-            mx = parent ? parent.getViewMatrix().invert() : matrix;
-        return mx && mx._shiftless();
-    },
+
 
     statics: /** @lends Item */{
         /**
@@ -436,166 +288,7 @@ new function() { // Injection scope for various item event handlers
         }
     }
 
-    /**
-     * The bounding rectangle of the item excluding stroke width.
-     *
-     * @name Item#bounds
-     * @type Rectangle
-     */
-
-    /**
-     * The bounding rectangle of the item including stroke width.
-     *
-     * @name Item#strokeBounds
-     * @type Rectangle
-     */
-
-    /**
-     * The bounding rectangle of the item including handles.
-     *
-     * @name Item#handleBounds
-     * @type Rectangle
-     */
-
-    /**
-     * The rough bounding rectangle of the item that is sure to include all of
-     * the drawing, including stroke width.
-     *
-     * @name Item#roughBounds
-     * @type Rectangle
-     * @ignore
-     */
 }), /** @lends Item# */{
-    // Enforce creation of beans, as bean getters have hidden parameters.
-    // See #getGlobalMatrix() below.
-    beans: true,
-
-    _decompose: function() {
-        return this._decomposed || (this._decomposed = this._matrix.decompose());
-    },
-
-    /**
-     * The current rotation angle of the item, as described by its
-     * {@link #matrix}.
-     *
-     * @bean
-     * @type Number
-     */
-    getRotation: function() {
-        var decomposed = this._decompose();
-        return decomposed && decomposed.rotation;
-    },
-
-    setRotation: function(rotation) {
-        var current = this.getRotation();
-        if (current != null && rotation != null) {
-            this.rotate(rotation - current);
-        }
-    },
-
-    /**
-     * The current scale factor of the item, as described by its
-     * {@link #matrix}.
-     *
-     * @bean
-     * @type Point
-     */
-    getScaling: function() {
-        var decomposed = this._decompose(),
-            scaling = decomposed && decomposed.scaling;
-        return scaling
-                ? new LinkedPoint(scaling.x, scaling.y, this, 'setScaling')
-                : undefined;
-    },
-
-    setScaling: function(/* scaling */) {
-        var current = this.getScaling(),
-            // Clone existing points since we're caching internally.
-            scaling = Point.read(arguments, 0, { clone: true, readNull: true });
-        if (current && scaling) {
-            this.scale(scaling.x / current.x, scaling.y / current.y);
-        }
-    },
-
-    /**
-     * The item's transformation matrix, defining position and dimensions in
-     * relation to its parent item in which it is contained.
-     *
-     * @bean
-     * @type Matrix
-     */
-    getMatrix: function() {
-        return this._matrix;
-    },
-
-    setMatrix: function() {
-        // Use Matrix#initialize to easily copy over values.
-        // NOTE: calling initialize() also calls #_changed() for us, through its
-        // call to #set() / #reset(), and this also handles _applyMatrix for us.
-        var matrix = this._matrix;
-        matrix.initialize.apply(matrix, arguments);
-    },
-
-    /**
-     * The item's global transformation matrix in relation to the global project
-     * coordinate space. Note that the view's transformations resulting from
-     * zooming and panning are not factored in.
-     *
-     * @bean
-     * @type Matrix
-     */
-    getGlobalMatrix: function(_dontClone) {
-        var matrix = this._globalMatrix,
-            updateVersion = this._project._updateVersion;
-        // If #_globalMatrix is out of sync, recalculate it now.
-        if (matrix && matrix._updateVersion !== updateVersion)
-            matrix = null;
-        if (!matrix) {
-            matrix = this._globalMatrix = this._matrix.clone();
-            var parent = this._parent;
-            if (parent)
-                matrix.prepend(parent.getGlobalMatrix(true));
-            matrix._updateVersion = updateVersion;
-        }
-        return _dontClone ? matrix : matrix.clone();
-    },
-
-    /**
-     * The item's global matrix in relation to the view coordinate space. This
-     * means that the view's transformations resulting from zooming and panning
-     * are factored in.
-     *
-     * @bean
-     * @type Matrix
-     */
-    getViewMatrix: function() {
-        return this.getGlobalMatrix().prepend(this.getView()._matrix);
-    },
-
-    /**
-     * Controls whether the transformations applied to the item (e.g. through
-     * {@link #transform(matrix)}, {@link #rotate(angle)},
-     * {@link #scale(scale)}, etc.) are stored in its {@link #matrix} property,
-     * or whether they are directly applied to its contents or children (passed
-     * on to the segments in {@link Path} items, the children of {@link Group}
-     * items, etc.).
-     *
-     * @bean
-     * @type Boolean
-     * @default true
-     */
-    getApplyMatrix: function() {
-        return this._applyMatrix;
-    },
-
-    setApplyMatrix: function(apply) {
-        // Tell #transform() to apply the internal matrix if _applyMatrix
-        // can be set to true.
-        if (this._applyMatrix = this._canApplyMatrix && !!apply)
-            this.transform(null, true);
-    },
-
-}, /** @lends Item# */{
 
     /**
      * Clones the item within the same project and places the copy above the
@@ -756,8 +449,6 @@ new function() { // Injection scope for various item event handlers
                 // are kept in sync.
                 if (name)
                     item.setName(name);
-                //if (notifySelf)
-                //    this._changed(/*#=*/Change.INSERTION);
             }
         } else {
             items = null;
@@ -794,19 +485,7 @@ new function() { // Injection scope for various item event handlers
         return this.transform(new Matrix()[key](value,
                 center || this.getPosition(true)));
     };
-}, /** @lends Item# */{
-    /**
-     * {@grouptitle Transform Functions}
-     *
-     * Translates (moves) the item by the given offset views.
-     *
-     * @param {Point} delta the offset to translate the item by
-     */
-    translate: function(/* delta */) {
-        var mx = new Matrix();
-        return this.transform(mx.translate.apply(mx, arguments));
-    },
-
+}, {
 
     transform: function(matrix, _applyMatrix, _applyRecursively,
             _setApplyMatrix) {
@@ -857,9 +536,7 @@ new function() { // Injection scope for various item event handlers
         // on matrix we can calculate and set them again, so preserve them.
         var bounds = this._bounds,
             position = this._position;
-        // We always need to call _changed since we're caching bounds on all
-        // items, including Group.
-        this._changed(/*#=*/Change.GEOMETRY);
+
         // Detect matrices that contain only translations and scaling
         // and transform the cached _bounds and _position without having to
         // fully recalculate each time.

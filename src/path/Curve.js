@@ -118,129 +118,8 @@ var Curve = Base.extend(/** @lends Curve# */{
         this._segment2 = seg2 || new Segment(point2, handle2, null);
     },
 
-    _serialize: function(options, dictionary) {
-        // If it has no handles, only serialize points, otherwise handles too.
-        return Base.serialize(this.hasHandles()
-                ? [this.getPoint1(), this.getHandle1(), this.getHandle2(),
-                    this.getPoint2()]
-                : [this.getPoint1(), this.getPoint2()],
-                options, true, dictionary);
-    },
+  
 
-    /**
-     * Returns a copy of the curve.
-     *
-     * @return {Curve}
-     */
-    clone: function() {
-        return new Curve(this._segment1, this._segment2);
-    },
-
-    /**
-     * @return {String} a string representation of the curve
-     */
-    toString: function() {
-        var parts = [ 'point1: ' + this._segment1._point ];
-        if (!this._segment1._handleOut.isZero())
-            parts.push('handle1: ' + this._segment1._handleOut);
-        if (!this._segment2._handleIn.isZero())
-            parts.push('handle2: ' + this._segment2._handleIn);
-        parts.push('point2: ' + this._segment2._point);
-        return '{ ' + parts.join(', ') + ' }';
-    },
-
-    /**
-     * Removes the curve from the path that it belongs to, by removing its
-     * second segment and merging its handle with the first segment.
-     * @return {Boolean} {@true if the curve was removed}
-     */
-    remove: function() {
-        var removed = false;
-        if (this._path) {
-            var segment2 = this._segment2,
-                handleOut = segment2._handleOut;
-            removed = segment2.remove();
-            if (removed)
-                this._segment1._handleOut.set(handleOut);
-        }
-        return removed;
-    },
-
-    /**
-     * The first anchor point of the curve.
-     *
-     * @bean
-     * @type Point
-     */
-    getPoint1: function() {
-        return this._segment1._point;
-    },
-
-    setPoint1: function(/* point */) {
-        this._segment1._point.set(Point.read(arguments));
-    },
-
-    /**
-     * The second anchor point of the curve.
-     *
-     * @bean
-     * @type Point
-     */
-    getPoint2: function() {
-        return this._segment2._point;
-    },
-
-    setPoint2: function(/* point */) {
-        this._segment2._point.set(Point.read(arguments));
-    },
-
-    /**
-     * The handle point that describes the tangent in the first anchor point.
-     *
-     * @bean
-     * @type Point
-     */
-    getHandle1: function() {
-        return this._segment1._handleOut;
-    },
-
-    setHandle1: function(/* point */) {
-        this._segment1._handleOut.set(Point.read(arguments));
-    },
-
-    /**
-     * The handle point that describes the tangent in the second anchor point.
-     *
-     * @bean
-     * @type Point
-     */
-    getHandle2: function() {
-        return this._segment2._handleIn;
-    },
-
-    setHandle2: function(/* point */) {
-        this._segment2._handleIn.set(Point.read(arguments));
-    },
-
-    /**
-     * The first segment of the curve.
-     *
-     * @bean
-     * @type Segment
-     */
-    getSegment1: function() {
-        return this._segment1;
-    },
-
-    /**
-     * The second segment of the curve.
-     *
-     * @bean
-     * @type Segment
-     */
-    getSegment2: function() {
-        return this._segment2;
-    },
 
     /**
      * The path that the curve belongs to.
@@ -288,45 +167,6 @@ var Curve = Base.extend(/** @lends Curve# */{
                 || this._path._closed && curves[curves.length - 1]) || null;
     },
 
-    /**
-     * Checks if the this is the first curve in the {@link Path#curves} array.
-     *
-     * @return {Boolean} {@true if this is the first curve}
-     */
-    isFirst: function() {
-        return !this._segment1._index;
-    },
-
-    /**
-     * Checks if the this is the last curve in the {@link Path#curves} array.
-     *
-     * @return {Boolean} {@true if this is the last curve}
-     */
-    isLast: function() {
-        var path = this._path;
-        return path && this._segment1._index === path._curves.length - 1
-                || false;
-    },
-
-    /**
-     * Specifies whether the points and handles of the curve are selected.
-     *
-     * @bean
-     * @type Boolean
-     */
-    isSelected: function() {
-        return this.getPoint1().isSelected()
-                && this.getHandle2().isSelected()
-                && this.getHandle2().isSelected()
-                && this.getPoint2().isSelected();
-    },
-
-    setSelected: function(selected) {
-        this.getPoint1().setSelected(selected);
-        this.getHandle1().setSelected(selected);
-        this.getHandle2().setSelected(selected);
-        this.getPoint2().setSelected(selected);
-    },
 
     /**
      * An array of 8 float values, describing this curve's geometry in four
@@ -343,23 +183,6 @@ var Curve = Base.extend(/** @lends Curve# */{
         return Curve.getValues(this._segment1, this._segment2, matrix);
     },
 
-    /**
-     * An array of 4 point objects, describing this curve's geometry in absolute
-     * coordinates (point1, handle1, handle2, point2).
-     *
-     * Note that the handles are converted to absolute coordinates.
-     *
-     * @bean
-     * @type Point[]
-     */
-    getPoints: function() {
-        // Convert to array of absolute points
-        var coords = this.getValues(),
-            points = [];
-        for (var i = 0; i < 8; i += 2)
-            points.push(new Point(coords[i], coords[i + 1]));
-        return points;
-    },
 
     /**
      * The approximated length of the curve.
@@ -373,82 +196,7 @@ var Curve = Base.extend(/** @lends Curve# */{
         return this._length;
     },
 
-    /**
-     * The area that the curve's geometry is covering.
-     *
-     * @bean
-     * @type Number
-     */
-    getArea: function() {
-        return Curve.getArea(this.getValues());
-    },
-
-    /**
-     * @bean
-     * @type Line
-     * @private
-     */
-    getLine: function() {
-        return new Line(this._segment1._point, this._segment2._point);
-    },
-
-    /**
-     * Creates a new curve as a sub-curve from this curve, its range defined by
-     * the given curve-time parameters. If `from` is larger than `to`, then
-     * the resulting curve will have its direction reversed.
-     *
-     * @param {Number} from the curve-time parameter at which the sub-curve
-     * starts
-     * @param {Number} to the curve-time parameter at which the sub-curve
-     * ends
-     * @return {Curve} the newly create sub-curve
-     */
-    getPart: function(from, to) {
-        return new Curve(Curve.getPart(this.getValues(), from, to));
-    },
-
-    // DOCS: Curve#getPartLength(from, to)
-    getPartLength: function(from, to) {
-        return Curve.getLength(this.getValues(), from, to);
-    },
-
-    /**
-     * Returns all intersections between two {@link Curve} objects as an array
-     * of {@link CurveLocation} objects.
-     *
-     * @param {Curve} curve the other curve to find the intersections with (if
-     *     the curve itself or `null` is passed, the self intersection of the
-     *     curve is returned, if it exists)
-     * @return {CurveLocation[]} the locations of all intersections between the
-     *     curves
-     */
-    getIntersections: function(curve) {
-        return Curve._getIntersections(this.getValues(),
-                curve && curve !== this ? curve.getValues() : null,
-                this, curve, [], {});
-    },
-
-    // TODO: adjustThroughPoint
-
-    /**
-     * Divides the curve into two curves at the given offset. The curve itself
-     * is modified and becomes the first part, the second part is returned as a
-     * new curve. If the modified curve belongs to a path item, the second part
-     * is also added to the path.
-     *
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve at which to divide
-     * @return {Curve} the second part of the divided curve, if the offset is
-     *     within the valid range, {code null} otherwise.
-     * @see #divideAtTime(time)
-     */
-    divideAt: function(location) {
-        // Accept offsets and CurveLocation objects, as well as objects that act
-        // like them.
-        return this.divideAtTime(location && location.curve === this
-                ? location.time : location);
-    },
-
+  
     /**
      * Divides the curve into two curves at the given curve-time parameter. The
      * curve itself is modified and becomes the first part, the second part is
@@ -504,73 +252,7 @@ var Curve = Base.extend(/** @lends Curve# */{
         return res;
     },
 
-    /**
-     * Splits the path this curve belongs to at the given offset. After
-     * splitting, the path will be open. If the path was open already, splitting
-     * will result in two paths.
-     *
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve at which to split
-     * @return {Path} the newly created path after splitting, if any
-     * @see Path#splitAt(offset)
-     */
-    splitAt: function(location) {
-        return this._path ? this._path.splitAt(location) : null;
-    },
-
-    /**
-     * Splits the path this curve belongs to at the given offset. After
-     * splitting, the path will be open. If the path was open already, splitting
-     * will result in two paths.
-     *
-     * @param {Number} time the curve-time parameter on the curve at which to
-     *     split
-     * @return {Path} the newly created path after splitting, if any
-     * @see Path#splitAt(offset)
-     */
-    splitAtTime: function(t) {
-        return this.splitAt(this.getLocationAtTime(t));
-    },
-
-    // TODO: Remove in 1.0.0? (deprecated January 2016):
-    /**
-     * @deprecated use use {@link #divideAt(offset)} or
-     * {@link #divideAtTime(time)} instead.
-     */
-    divide: function(offset, isTime) {
-        return this.divideAtTime(offset === undefined ? 0.5 : isTime ? offset
-                : this.getTimeAt(offset));
-    },
-
-    // TODO: Remove in 1.0.0? (deprecated January 2016):
-    /**
-     * @deprecated use use {@link #splitAt(offset)} or
-     * {@link #splitAtTime(time)} instead.
-     */
-    split: function(offset, isTime) {
-        return this.splitAtTime(offset === undefined ? 0.5 : isTime ? offset
-                : this.getTimeAt(offset));
-    },
-
-    /**
-     * Returns a reversed version of the curve, without modifying the curve
-     * itself.
-     *
-     * @return {Curve} a reversed version of the curve
-     */
-    reversed: function() {
-        return new Curve(this._segment2.reversed(), this._segment1.reversed());
-    },
-
-    /**
-     * Clears the curve's handles by setting their coordinates to zero,
-     * turning the curve into a straight line.
-     */
-    clearHandles: function() {
-        this._segment1._handleOut._set(0, 0);
-        this._segment2._handleIn._set(0, 0);
-    },
-
+ 
 statics: /** @lends Curve */{
     getValues: function(segment1, segment2, matrix) {
         var p1 = segment1._point,
@@ -715,50 +397,7 @@ statics: /** @lends Curve */{
              : null;
     },
 
-    getNearestTime: function(v, point) {
-        if (Curve.isStraight(v)) {
-            var p1x = v[0], p1y = v[1],
-                p2x = v[6], p2y = v[7],
-                vx = p2x - p1x, vy = p2y - p1y,
-                det = vx * vx + vy * vy;
-            // Avoid divisions by zero.
-            if (det === 0)
-                return 0;
-            // Project the point onto the line and calculate its linear
-            // parameter u along the line: u = (point - p1).dot(v) / v.dot(v)
-            var u = ((point.x - p1x) * vx + (point.y - p1y) * vy) / det;
-            return u < /*#=*/Numerical.EPSILON ? 0
-                 : u > /*#=*/(1 - Numerical.EPSILON) ? 1
-                 : Curve.getTimeOf(v,
-                    new Point(p1x + u * vx, p1y + u * vy));
-        }
-
-        var count = 100,
-            minDist = Infinity,
-            minT = 0;
-
-        function refine(t) {
-            if (t >= 0 && t <= 1) {
-                var dist = point.getDistance(Curve.getPoint(v, t), true);
-                if (dist < minDist) {
-                    minDist = dist;
-                    minT = t;
-                    return true;
-                }
-            }
-        }
-
-        for (var i = 0; i <= count; i++)
-            refine(i / count);
-
-        // Now iteratively refine solution until we reach desired precision.
-        var step = 1 / (count * 2);
-        while (step > /*#=*/Numerical.CURVETIME_EPSILON) {
-            if (!refine(minT - step) && !refine(minT + step))
-                step /= 2;
-        }
-        return minT;
-    },
+   
 
     // TODO: Find better name
     getPart: function(v, from, to) {
@@ -779,30 +418,7 @@ statics: /** @lends Curve */{
                 : v;
     },
 
-    /**
-     * Determines if a curve is sufficiently flat, meaning it appears as a
-     * straight line and has curve-time that is enough linear, as specified by
-     * the given `flatness` parameter.
-     *
-     * @param {Number} flatness the maximum error allowed for the straight line
-     *     to deviate from the curve
-     *
-     * @private
-     */
-    isFlatEnough: function(v, flatness) {
-        // Thanks to Kaspar Fischer and Roger Willcocks for the following:
-        // http://hcklbrrfnn.files.wordpress.com/2012/08/bez.pdf
-        var p1x = v[0], p1y = v[1],
-            c1x = v[2], c1y = v[3],
-            c2x = v[4], c2y = v[5],
-            p2x = v[6], p2y = v[7],
-            ux = 3 * c1x - 2 * p1x - p2x,
-            uy = 3 * c1y - 2 * p1y - p2y,
-            vx = 3 * c2x - 2 * p2x - p1x,
-            vy = 3 * c2y - 2 * p2y - p1y;
-        return Math.max(ux * ux, vx * vx) + Math.max(uy * uy, vy * vy)
-                <= 16 * flatness * flatness;
-    },
+
 
     getArea: function(v) {
         // http://objectmix.com/graphics/133553-area-closed-bezier-curve.html
@@ -815,15 +431,7 @@ statics: /** @lends Curve */{
                 + p2y * (c2x + p1x / 3) - p2x * (c2y + p1y / 3)) / 20;
     },
 
-    getBounds: function(v) {
-        var min = v.slice(0, 2), // Start with values of point1
-            max = min.slice(), // clone
-            roots = [0, 0];
-        for (var i = 0; i < 2; i++)
-            Curve._addBounds(v[i], v[i + 2], v[i + 4], v[i + 6],
-                    i, 0, min, max, roots);
-        return new Rectangle(min[0], min[1], max[0] - min[0], max[1] - min[1]);
-    },
+
 
     /**
      * Private helper for both Curve.getBounds() and Path.getBounds(), which
@@ -887,60 +495,7 @@ statics: /** @lends Curve */{
             }
         }
     }
-}}, Base.each(
-    ['getBounds', 'getStrokeBounds', 'getHandleBounds'],
-    // NOTE: Although Curve.getBounds() exists, we are using Path.getBounds() to
-    // determine the bounds of Curve objects with defined segment1 and segment2
-    // values Curve.getBounds() can be used directly on curve arrays, without
-    // the need to create a Curve object first, as required by the code that
-    // finds path interesections.
-    function(name) {
-        this[name] = function() {
-            if (!this._bounds)
-                this._bounds = {};
-            var bounds = this._bounds[name];
-            if (!bounds) {
-                // Calculate the curve bounds by passing a segment list for the
-                // curve to the static Path.get*Boudns methods.
-                bounds = this._bounds[name] = Path[name](
-                        [this._segment1, this._segment2], false, this._path);
-            }
-            return bounds.clone();
-        };
-    },
-/** @lends Curve# */{
-    /**
-     * {@grouptitle Bounding Boxes}
-     *
-     * The bounding rectangle of the curve excluding stroke width.
-     *
-     * @name Curve#bounds
-     * @type Rectangle
-     */
-
-    /**
-     * The bounding rectangle of the curve including stroke width.
-     *
-     * @name Curve#strokeBounds
-     * @type Rectangle
-     */
-
-    /**
-     * The bounding rectangle of the curve including handles.
-     *
-     * @name Curve#handleBounds
-     * @type Rectangle
-     */
-
-    /**
-     * The rough bounding rectangle of the curve that is sure to include all of
-     * the drawing, including stroke width.
-     *
-     * @name Curve#roughBounds
-     * @type Rectangle
-     * @ignore
-     */
-}), Base.each({ // Injection scope for tests both as instance and static methods
+}},  Base.each({ // Injection scope for tests both as instance and static methods
     isStraight: function(l, h1, h2) {
         if (h1.isZero() && h2.isZero()) {
             // No handles.
@@ -1006,91 +561,15 @@ statics: /** @lends Curve */{
                 || !this._segment2._handleIn.isZero();
     },
 
-    /**
-     * Checks if this curve appears as a straight line. This can mean that
-     * it has no handles defined, or that the handles run collinear with the
-     * line that connects the curve's start and end point, not falling
-     * outside of the line.
-     *
-     * @name Curve#isStraight
-     * @function
-     * @return {Boolean} {@true if the curve is straight}
-     */
-
-    /**
-     * Checks if this curve is parametrically linear, meaning that it is
-     * straight and its handles are positioned at 1/3 and 2/3 of the total
-     * length of the curve.
-     *
-     * @name Curve#isLinear
-     * @function
-     * @return {Boolean} {@true if the curve is parametrically linear}
-     */
-
-    /**
-     * Checks if the the two curves describe straight lines that are
-     * collinear, meaning they run in parallel.
-     *
-     * @param {Curve} curve the other curve to check against
-     * @return {Boolean} {@true if the two lines are collinear}
-     */
-    isCollinear: function(curve) {
-        return curve && this.isStraight() && curve.isStraight()
-                && this.getLine().isCollinear(curve.getLine());
-    },
-
-    /**
-     * Checks if the curve is a straight horizontal line.
-     *
-     * @return {Boolean} {@true if the line is horizontal}
-     */
-    isHorizontal: function() {
-        return this.isStraight() && Math.abs(this.getTangentAtTime(0.5).y)
-                < /*#=*/Numerical.TRIGONOMETRIC_EPSILON;
-    },
-
-    /**
-     * Checks if the curve is a straight vertical line.
-     *
-     * @return {Boolean} {@true if the line is vertical}
-     */
-    isVertical: function() {
-        return this.isStraight() && Math.abs(this.getTangentAtTime(0.5).x)
-                < /*#=*/Numerical.TRIGONOMETRIC_EPSILON;
-    }
+  
+    
 }), /** @lends Curve# */{
     // Explicitly deactivate the creation of beans, as we have functions here
     // that look like bean getters but actually read arguments.
     // See #getTimeOf(), #getLocationOf(), #getNearestLocation(), ...
     beans: false,
 
-    /**
-     * {@grouptitle Positions on Curves}
-     *
-     * Calculates the curve location at the specified offset on the curve.
-     *
-     * @param {Number} offset the offset on the curve
-     * @return {CurveLocation} the curve location at the specified the offset
-     */
-    getLocationAt: function(offset, _isTime) {
-        // TODO: Remove _isTime handling in 1.0.0? (deprecated Jan 2016):
-        return this.getLocationAtTime(
-                _isTime ? offset : this.getTimeAt(offset));
-    },
-
-    /**
-     * Calculates the curve location at the specified curve-time parameter on
-     * the curve.
-     *
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {CurveLocation} the curve location at the specified the location
-     */
-    getLocationAtTime: function(t) {
-        return t != null && t >= 0 && t <= 1
-                ? new CurveLocation(this, t)
-                : null;
-    },
-
+    
     /**
      * Calculates the curve-time parameter of the specified offset on the path,
      * relative to the provided start parameter. If offset is a negative value,
@@ -1114,213 +593,6 @@ statics: /** @lends Curve */{
      */
     getParameterAt: '#getTimeAt',
 
-    /**
-     * Calculates the curve offset at the specified curve-time parameter on
-     * the curve.
-     *
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {Number} the curve offset at the specified the location
-     */
-    getOffsetAtTime: function(t) {
-        return this.getPartLength(0, t);
-    },
-
-    /**
-     * Returns the curve location of the specified point if it lies on the
-     * curve, `null` otherwise.
-     *
-     * @param {Point} point the point on the curve
-     * @return {CurveLocation} the curve location of the specified point
-     */
-    getLocationOf: function(/* point */) {
-        return this.getLocationAtTime(this.getTimeOf(Point.read(arguments)));
-    },
-
-    /**
-     * Returns the length of the path from its beginning up to up to the
-     * specified point if it lies on the path, `null` otherwise.
-     *
-     * @param {Point} point the point on the path
-     * @return {Number} the length of the path up to the specified point
-     */
-    getOffsetOf: function(/* point */) {
-        var loc = this.getLocationOf.apply(this, arguments);
-        return loc ? loc.getOffset() : null;
-    },
-
-    /**
-     * Returns the curve-time parameter of the specified point if it lies on the
-     * curve, `null` otherwise.
-     * Note that if there is more than one possible solution in a
-     * self-intersecting curve, the first found result is returned.
-     *
-     * @param {Point} point the point on the curve
-     * @return {Number} the curve-time parameter of the specified point
-     */
-    getTimeOf: function(/* point */) {
-        return Curve.getTimeOf(this.getValues(), Point.read(arguments));
-    },
-
-    // TODO: Remove in 1.0.0? (deprecated January 2016):
-    /**
-     * @deprecated use use {@link #getTimeOf(point)} instead.
-     */
-    getParameterOf: '#getTimeOf',
-
-    /**
-     * Returns the nearest location on the curve to the specified point.
-     *
-     * @function
-     * @param {Point} point the point for which we search the nearest location
-     * @return {CurveLocation} the location on the curve that's the closest to
-     * the specified point
-     */
-    getNearestLocation: function(/* point */) {
-        var point = Point.read(arguments),
-            values = this.getValues(),
-            t = Curve.getNearestTime(values, point),
-            pt = Curve.getPoint(values, t);
-        return new CurveLocation(this, t, pt, null, point.getDistance(pt));
-    },
-
-    /**
-     * Returns the nearest point on the curve to the specified point.
-     *
-     * @function
-     * @param {Point} point the point for which we search the nearest point
-     * @return {Point} the point on the curve that's the closest to the
-     * specified point
-     */
-    getNearestPoint: function(/* point */) {
-        var loc = this.getNearestLocation.apply(this, arguments);
-        return loc ? loc.getPoint() : loc;
-    }
-
-    /**
-     * Calculates the point on the curve at the given location.
-     *
-     * @name Curve#getPointAt
-     * @function
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve
-     * @return {Point} the point on the curve at the given location
-     */
-
-    /**
-     * Calculates the normalized tangent vector of the curve at the given
-     * location.
-     *
-     * @name Curve#getTangentAt
-     * @function
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve
-     * @return {Point} the normalized tangent of the curve at the given location
-     */
-
-    /**
-     * Calculates the normal vector of the curve at the given location.
-     *
-     * @name Curve#getNormalAt
-     * @function
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve
-     * @return {Point} the normal of the curve at the given location
-     */
-
-    /**
-     * Calculates the weighted tangent vector of the curve at the given
-     * location, its length reflecting the curve velocity at that location.
-     *
-     * @name Curve#getWeightedTangentAt
-     * @function
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve
-     * @return {Point} the weighted tangent of the curve at the given location
-     */
-
-    /**
-     * Calculates the weighted normal vector of the curve at the given location,
-     * its length reflecting the curve velocity at that location.
-     *
-     * @name Curve#getWeightedNormalAt
-     * @function
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve
-     * @return {Point} the weighted normal of the curve at the given location
-     */
-
-    /**
-     * Calculates the curvature of the curve at the given location. Curvatures
-     * indicate how sharply a curve changes direction. A straight line has zero
-     * curvature, where as a circle has a constant curvature. The curve's radius
-     * at the given location is the reciprocal value of its curvature.
-     *
-     * @name Curve#getCurvatureAt
-     * @function
-     * @param {Number|CurveLocation} location the offset or location on the
-     *     curve
-     * @return {Number} the curvature of the curve at the given location
-     */
-
-    /**
-     * Calculates the point on the curve at the given location.
-     *
-     * @name Curve#getPointAtTime
-     * @function
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {Point} the point on the curve at the given location
-     */
-
-    /**
-     * Calculates the normalized tangent vector of the curve at the given
-     * location.
-     *
-     * @name Curve#getTangentAtTime
-     * @function
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {Point} the normalized tangent of the curve at the given location
-     */
-
-    /**
-     * Calculates the normal vector of the curve at the given location.
-     *
-     * @name Curve#getNormalAtTime
-     * @function
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {Point} the normal of the curve at the given location
-     */
-
-    /**
-     * Calculates the weighted tangent vector of the curve at the given
-     * location, its length reflecting the curve velocity at that location.
-     *
-     * @name Curve#getWeightedTangentAtTime
-     * @function
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {Point} the weighted tangent of the curve at the given location
-     */
-
-    /**
-     * Calculates the weighted normal vector of the curve at the given location,
-     * its length reflecting the curve velocity at that location.
-     *
-     * @name Curve#getWeightedNormalAtTime
-     * @function
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {Point} the weighted normal of the curve at the given location
-     */
-
-    /**
-     * Calculates the curvature of the curve at the given location. Curvatures
-     * indicate how sharply a curve changes direction. A straight line has zero
-     * curvature, where as a circle has a constant curvature. The curve's radius
-     * at the given location is the reciprocal value of its curvature.
-     *
-     * @name Curve#getCurvatureAtTime
-     * @function
-     * @param {Number} time the curve-time parameter on the curve
-     * @return {Number} the curvature of the curve at the given location
-     */
 },
 new function() { // Injection scope for various curve evaluation methods
     var methods = ['getPoint', 'getTangent', 'getNormal', 'getWeightedTangent',
@@ -1552,23 +824,8 @@ new function() { // Scope for methods that require private functions
 
         getTangent: function(v, t) {
             return evaluate(v, t, 1, true);
-        },
-
-        getWeightedTangent: function(v, t) {
-            return evaluate(v, t, 1, false);
-        },
-
-        getNormal: function(v, t) {
-            return evaluate(v, t, 2, true);
-        },
-
-        getWeightedNormal: function(v, t) {
-            return evaluate(v, t, 2, false);
-        },
-
-        getCurvature: function(v, t) {
-            return evaluate(v, t, 3, false).x;
-        }
+        } 
+       
     }};
 },
 new function() { // Scope for intersection using bezier fat-line clipping

@@ -64,47 +64,11 @@ new function() {
     }
 
     function exportPath(item, options) {
-        var matchShapes = options.matchShapes;
-        if (matchShapes) {
-            var shape = item.toShape(false);
-            if (shape)
-                return exportShape(shape, options);
-        }
-        var segments = item._segments,
-            length = segments.length,
-            type,
-            attrs = getTransform(item._matrix);
-        if (matchShapes && length >= 2 && !item.hasHandles()) {
-            if (length > 2) {
-                type = item._closed ? 'polygon' : 'polyline';
-                var parts = [];
-                for(var i = 0; i < length; i++)
-                    parts.push(formatter.point(segments[i]._point));
-                attrs.points = parts.join(' ');
-            } else {
-                type = 'line';
-                var start = segments[0]._point,
-                    end = segments[1]._point;
-                attrs.set({
-                    x1: start.x,
-                    y1: start.y,
-                    x2: end.x,
-                    y2: end.y
-                });
-            }
-        } else {
-            type = 'path';
-            attrs.d = item.getPathData(null, options.precision);
-        }
-        return SvgElement.create(type, attrs, formatter);
+        return item.getPathData(null, options.precision);
     }
 
     function exportCompoundPath(item, options) {
-        var attrs = getTransform(item._matrix);
-        var data = item.getPathData(null, options.precision);
-        if (data)
-            attrs.d = data;
-        return SvgElement.create('path', attrs, formatter);
+        return item.getPathData(null, options.precision);
     }
 
     var exporters = {

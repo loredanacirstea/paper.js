@@ -90,18 +90,6 @@ var Line = Base.extend(/** @lends Line# */{
                 true, isInfinite);
     },
 
-    // DOCS: document Line#getSide(point)
-    /**
-     * @param {Point} point
-     * @param {Boolean} [isInfinite=false]
-     * @return {Number}
-     */
-    getSide: function(point, isInfinite) {
-        return Line.getSide(
-                this._px, this._py, this._vx, this._vy,
-                point.x, point.y, true, isInfinite);
-    },
-
     // DOCS: document Line#getDistance(point)
     /**
      * @param {Point} point
@@ -113,13 +101,7 @@ var Line = Base.extend(/** @lends Line# */{
                 point.x, point.y, true));
     },
 
-    isCollinear: function(line) {
-        return Point.isCollinear(this._vx, this._vy, line._vx, line._vy);
-    },
 
-    isOrthogonal: function(line) {
-        return Point.isOrthogonal(this._vx, this._vy, line._vx, line._vy);
-    },
 
     statics: /** @lends Line */{
         intersect: function(p1x, p1y, v1x, v1y, p2x, p2y, v2x, v2y, asVector,

@@ -148,18 +148,7 @@ var Segment = Base.extend(/** @lends Segment# */{
             this.setSelection(selection);
     },
 
-    _serialize: function(options, dictionary) {
-        // If it is has no handles, only serialize point, otherwise handles too.
-        var point = this._point,
-            selection = this._selection,
-            obj = selection || this.hasHandles()
-                    ? [point, this._handleIn, this._handleOut]
-                    : point;
-        if (selection)
-            obj.push(selection);
-        return Base.serialize(obj, options, true, dictionary);
-    },
-
+  
     /**
      * The anchor point of the segment.
      *
@@ -205,30 +194,6 @@ var Segment = Base.extend(/** @lends Segment# */{
     },
 
     /**
-     * Checks if the segment has any curve handles set.
-     *
-     * @return {Boolean} {@true if the segment has handles set}
-     * @see Segment#getHandleIn()
-     * @see Segment#getHandleOut()
-     * @see Curve#hasHandles()
-     * @see Path#hasHandles()
-     */
-    hasHandles: function() {
-        return !this._handleIn.isZero() || !this._handleOut.isZero();
-    },
-
-    /**
-     * Clears the segment's handles by setting their coordinates to zero,
-     * turning the segment into a corner.
-     */
-    clearHandles: function() {
-        this._handleIn._set(0, 0);
-        this._handleOut._set(0, 0);
-    },
-
-
-  
-    /**
      * The curve that the segment belongs to. For the last segment of an open
      * path, the previous segment is returned.
      *
@@ -266,99 +231,12 @@ var Segment = Base.extend(/** @lends Segment# */{
     },
 
 
-
-    /**
-     * Reverses the {@link #handleIn} and {@link #handleOut} vectors of this
-     * segment, modifying the actual segment without creating a copy.
-     *
-     * @return {Segment} the reversed segment
-     */
-    reverse: function() {
-        var handleIn = this._handleIn,
-            handleOut = this._handleOut,
-            tmp = handleIn.clone();
-        handleIn.set(handleOut);
-        handleOut.set(tmp);
-    },
-
-    /**
-     * Returns the reversed the segment, without modifying the segment itself.
-     * @return {Segment} the reversed segment
-     */
-    reversed: function() {
-        return new Segment(this._point, this._handleOut, this._handleIn);
-    },
-
     /**
      * Removes the segment from the path that it belongs to.
      * @return {Boolean} {@true if the segment was removed}
      */
     remove: function() {
         return this._path ? !!this._path.removeSegment(this._index) : false;
-    },
-
-    clone: function() {
-        return new Segment(this._point, this._handleIn, this._handleOut);
-    },
-
-    equals: function(segment) {
-        return segment === this || segment && this._class === segment._class
-                && this._point.equals(segment._point)
-                && this._handleIn.equals(segment._handleIn)
-                && this._handleOut.equals(segment._handleOut)
-                || false;
-    },
-
-    /**
-     * @return {String} a string representation of the segment
-     */
-    toString: function() {
-        var parts = [ 'point: ' + this._point ];
-        if (!this._handleIn.isZero())
-            parts.push('handleIn: ' + this._handleIn);
-        if (!this._handleOut.isZero())
-            parts.push('handleOut: ' + this._handleOut);
-        return '{ ' + parts.join(', ') + ' }';
-    },
-
-    /**
-     * Transform the segment by the specified matrix.
-     *
-     * @param {Matrix} matrix the matrix to transform the segment by
-     */
-    transform: function(matrix) {
-        this._transformCoordinates(matrix, new Array(6), true);
-    },
-
-    /**
-     * Interpolates between the two specified segments and sets the point and
-     * handles of this segment accordingly.
-     *
-     * @param {Segment} from the segment defining the geometry when `factor` is
-     *     `0`
-     * @param {Segment} to the segment defining the geometry when `factor` is
-     *     `1`
-     * @param {Number} factor the interpolation coefficient, typically between
-     *     `0` and `1`, but extrapolation is possible too
-     */
-    interpolate: function(from, to, factor) {
-        var u = 1 - factor,
-            v = factor,
-            point1 = from._point,
-            point2 = to._point,
-            handleIn1 = from._handleIn,
-            handleIn2 = to._handleIn,
-            handleOut2 = to._handleOut,
-            handleOut1 = from._handleOut;
-        this._point._set(
-                u * point1._x + v * point2._x,
-                u * point1._y + v * point2._y, true);
-        this._handleIn._set(
-                u * handleIn1._x + v * handleIn2._x,
-                u * handleIn1._y + v * handleIn2._y, true);
-        this._handleOut._set(
-                u * handleOut1._x + v * handleOut2._x,
-                u * handleOut1._y + v * handleOut2._y, true);
     },
 
     _transformCoordinates: function(matrix, coords, change) {

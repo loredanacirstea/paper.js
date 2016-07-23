@@ -20,10 +20,7 @@
 // DOCS: Explain that path matrix is always applied with each transformation.
 var Path = PathItem.extend(/** @lends Path# */{
     _class: 'Path',
-    _serializeFields: {
-        segments: [],
-        closed: false
-    },
+    
 
     initialize: function Path(arg) {
         this._closed = false;
@@ -222,14 +219,7 @@ var Path = PathItem.extend(/** @lends Path# */{
         return !this._segments.length;
     },
 
-    _transformContent: function(matrix) {
-        var segments = this._segments,
-            coords = new Array(6);
-        for (var i = 0, l = segments.length; i < l; i++)
-            segments[i]._transformCoordinates(matrix, coords, true);
-        return true;
-    },
-
+  
 
     _add: function(segs, index) {
         // Local short-cuts:
@@ -526,25 +516,7 @@ var Path = PathItem.extend(/** @lends Path# */{
 
     // TODO: intersects(item)
     // TODO: contains(item)
-}, Base.each(Curve._evaluateMethods,
-    function(name) {
-        // NOTE: (For easier searching): This loop produces:
-        // getPointAt, getTangentAt, getNormalAt, getWeightedTangentAt,
-        // getWeightedNormalAt, getCurvatureAt
-        this[name + 'At'] = function(offset) {
-            var loc = this.getLocationAt(offset);
-            return loc && loc[name]();
-        };
-    },
-/** @lends Path# */{
-    // Explicitly deactivate the creation of beans, as we have functions here
-    // that look like bean getters but actually read arguments.
-    // See #getLocationOf(), #getOffsetOf(), #getLocationAt()
-    beans: false,
-
-
-
-}),
+}, 
 
 new function() { // PostScript-style drawing commands
 
@@ -836,63 +808,4 @@ new function() { // PostScript-style drawing commands
             this.join(this, tolerance);
         }
     };
-}, { // A dedicated scope for the tricky bounds calculations
-    // We define all the different getBounds functions as static methods on Path
-    // and have #_getBounds directly access these. All static bounds functions
-    // below have the same first four parameters: segments, closed, path,
-    // matrix, so they can be called from #_getBounds() and also be used in
-    // Curve. But not all of them use all these parameters, and some define
-    // additional ones after.
-
-    _getBounds: function(matrix, options) {
-        var method = options.handle
-                ? 'getHandleBounds'
-                : options.stroke
-                ? 'getStrokeBounds'
-                : 'getBounds';
-        return Path[method](this._segments, this._closed, this, matrix, options);
-    },
-
-// Mess with indentation in order to get more line-space below:
-statics: {
-    /**
-     * Returns the bounding rectangle of the item excluding stroke width.
-     *
-     * @private
-     */
-    getBounds: function(segments, closed, path, matrix, options, strokePadding) {
-        var first = segments[0];
-        // If there are no segments, return "empty" rectangle, just like groups,
-        // since #bounds is assumed to never return null.
-        if (!first)
-            return new Rectangle();
-        var coords = new Array(6),
-            // Make coordinates for first segment available in prevCoords.
-            prevCoords = first._transformCoordinates(matrix, new Array(6)),
-            min = prevCoords.slice(0, 2), // Start with values of first point
-            max = min.slice(), // clone
-            roots = new Array(2);
-
-        function processSegment(segment) {
-            segment._transformCoordinates(matrix, coords);
-            for (var i = 0; i < 2; i++) {
-                Curve._addBounds(
-                    prevCoords[i], // prev.point
-                    prevCoords[i + 4], // prev.handleOut
-                    coords[i + 2], // segment.handleIn
-                    coords[i], // segment.point,
-                    i, strokePadding ? strokePadding[i] : 0, min, max, roots);
-            }
-            // Swap coordinate buffers.
-            var tmp = prevCoords;
-            prevCoords = coords;
-            coords = tmp;
-        }
-
-        for (var i = 1, l = segments.length; i < l; i++)
-            processSegment(segments[i]);
-        if (closed)
-            processSegment(first);
-        return new Rectangle(min[0], min[1], max[0] - min[0], max[1] - min[1]);
-    }
-}});
+});

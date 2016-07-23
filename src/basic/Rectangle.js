@@ -25,56 +25,6 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
     // See  #getPoint() below.
     beans: true,
 
-    /**
-     * Creates a Rectangle object.
-     *
-     * @name Rectangle#initialize
-     * @param {Point} point the top-left point of the rectangle
-     * @param {Size} size the size of the rectangle
-     */
-    /**
-     * Creates a Rectangle object.
-     *
-     * @name Rectangle#initialize
-     * @param {Object} object an object containing properties to be set on the
-     * rectangle
-     *
-     * @example // Create a rectangle between {x: 20, y: 20} and {x: 80, y:80}
-     * var rectangle = new Rectangle({
-     *     point: [20, 20],
-     *     size: [60, 60]
-     * });
-     *
-     * @example // Create a rectangle between {x: 20, y: 20} and {x: 80, y:80}
-     * var rectangle = new Rectangle({
-     *     from: [20, 20],
-     *     to: [80, 80]
-     * });
-     */
-    /**
-     * Creates a rectangle object.
-     *
-     * @name Rectangle#initialize
-     * @param {Number} x the left coordinate
-     * @param {Number} y the top coordinate
-     * @param {Number} width
-     * @param {Number} height
-     */
-    /**
-     * Creates a rectangle object from the passed points. These do not
-     * necessarily need to be the top left and bottom right corners, the
-     * constructor figures out how to fit a rectangle between them.
-     *
-     * @name Rectangle#initialize
-     * @param {Point} from the first point defining the rectangle
-     * @param {Point} to the second point defining the rectangle
-     */
-    /**
-     * Creates a new rectangle object from the passed rectangle object.
-     *
-     * @name Rectangle#initialize
-     * @param {Rectangle} rt
-     */
     initialize: function Rectangle(arg0, arg1, arg2, arg3) {
         var type = typeof arg0,
             read;
@@ -165,37 +115,6 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
         return this;
     },
 
-    /**
-     * The x position of the rectangle.
-     *
-     * @name Rectangle#x
-     * @type Number
-     */
-
-    /**
-     * The y position of the rectangle.
-     *
-     * @name Rectangle#y
-     * @type Number
-     */
-
-    /**
-     * The width of the rectangle.
-     *
-     * @name Rectangle#width
-     * @type Number
-     */
-
-    /**
-     * The height of the rectangle.
-     *
-     * @name Rectangle#height
-     * @type Number
-     */
-
-    /**
-     * Returns a copy of the rectangle.
-     */
     clone: function() {
         return new Rectangle(this.x, this.y, this.width, this.height);
     },
@@ -229,15 +148,7 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
                 + ' }';
     },
 
-    _serialize: function(options) {
-        var f = options.formatter;
-        // See Point#_serialize()
-        return [f.number(this.x),
-                f.number(this.y),
-                f.number(this.width),
-                f.number(this.height)];
-    },
-
+  
     /**
      * The top-left point of the rectangle
      *
@@ -422,68 +333,6 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
         return this;
     },
 
-    /**
-     * The top-left point of the rectangle.
-     *
-     * @name Rectangle#topLeft
-     * @type Point
-     */
-
-    /**
-     * The top-right point of the rectangle.
-     *
-     * @name Rectangle#topRight
-     * @type Point
-     */
-
-    /**
-     * The bottom-left point of the rectangle.
-     *
-     * @name Rectangle#bottomLeft
-     * @type Point
-     */
-
-    /**
-     * The bottom-right point of the rectangle.
-     *
-     * @name Rectangle#bottomRight
-     * @type Point
-     */
-
-    /**
-     * The left-center point of the rectangle.
-     *
-     * @name Rectangle#leftCenter
-     * @type Point
-     */
-
-    /**
-     * The top-center point of the rectangle.
-     *
-     * @name Rectangle#topCenter
-     * @type Point
-     */
-
-    /**
-     * The right-center point of the rectangle.
-     *
-     * @name Rectangle#rightCenter
-     * @type Point
-     */
-
-    /**
-     * The bottom-center point of the rectangle.
-     *
-     * @name Rectangle#bottomCenter
-     * @type Point
-     */
-
-    /**
-     * The area of the rectangle.
-     *
-     * @bean
-     * @type Number
-     */
     getArea: function() {
         return this.width * this.height;
     },
@@ -796,136 +645,4 @@ var Rectangle = Base.extend(/** @lends Rectangle# */{
         return this.expand(this.width * hor - this.width,
                 this.height * (ver === undefined ? hor : ver) - this.height);
     }
-}, Base.each([
-        ['Top', 'Left'], ['Top', 'Right'],
-        ['Bottom', 'Left'], ['Bottom', 'Right'],
-        ['Left', 'Center'], ['Top', 'Center'],
-        ['Right', 'Center'], ['Bottom', 'Center']
-    ],
-    function(parts, index) {
-        var part = parts.join(''),
-            // find out if the first of the pair is an x or y property,
-            // by checking the first character for [R]ight or [L]eft;
-            xFirst = /^[RL]/.test(part);
-        // Rename Center to CenterX or CenterY:
-        if (index >= 4)
-            parts[1] += xFirst ? 'Y' : 'X';
-        var x = parts[xFirst ? 0 : 1],
-            y = parts[xFirst ? 1 : 0],
-            getX = 'get' + x,
-            getY = 'get' + y,
-            setX = 'set' + x,
-            setY = 'set' + y,
-            get = 'get' + part,
-            set = 'set' + part;
-        this[get] = function(_dontLink) {
-            var ctor = _dontLink ? Point : LinkedPoint;
-            return new ctor(this[getX](), this[getY](), this, set);
-        };
-        this[set] = function(/* point */) {
-            var point = Point.read(arguments);
-            this[setX](point.x);
-            this[setY](point.y);
-        };
-    }, {
-        // Enforce creation of beans, as bean getters have hidden parameters
-        // See _dontLink argument above.
-        beans: true
-    }
-));
-
-/**
- * @name LinkedRectangle
- *
- * @class An internal version of Rectangle that notifies its owner of each
- * change through setting itself again on the setter that corresponds to the
- * getter that produced this LinkedRectangle.
- *
- * @private
- */
-var LinkedRectangle = Rectangle.extend({
-    // Have LinkedRectangle appear as a normal Rectangle in debugging
-    initialize: function Rectangle(x, y, width, height, owner, setter) {
-        this._set(x, y, width, height, true);
-        this._owner = owner;
-        this._setter = setter;
-    },
-
-    // See Point#_set() for an explanation of #_set():
-    _set: function(x, y, width, height, _dontNotify) {
-        this._x = x;
-        this._y = y;
-        this._width = width;
-        this._height = height;
-        if (!_dontNotify)
-            this._owner[this._setter](this);
-        return this;
-    }
-},
-new function() {
-    var proto = Rectangle.prototype;
-
-    return Base.each(['x', 'y', 'width', 'height'], function(key) {
-        var part = Base.capitalize(key),
-            internal = '_' + key;
-        this['get' + part] = function() {
-            return this[internal];
-        };
-
-        this['set' + part] = function(value) {
-            this[internal] = value;
-            // Check if this setter is called from another one which sets
-            // _dontNotify, as it will notify itself
-            if (!this._dontNotify)
-                this._owner[this._setter](this);
-        };
-    }, Base.each(['Point', 'Size', 'Center',
-            'Left', 'Top', 'Right', 'Bottom', 'CenterX', 'CenterY',
-            'TopLeft', 'TopRight', 'BottomLeft', 'BottomRight',
-            'LeftCenter', 'TopCenter', 'RightCenter', 'BottomCenter'],
-        function(key) {
-            var name = 'set' + key;
-            this[name] = function(/* value */) {
-                // Make sure the above setters of x, y, width, height do not
-                // each notify the owner, as we're going to take care of this
-                // afterwards here, only once per change.
-                this._dontNotify = true;
-                proto[name].apply(this, arguments);
-                this._dontNotify = false;
-                this._owner[this._setter](this);
-            };
-        }, /** @lends Rectangle# */{
-            /**
-             * {@grouptitle Item Bounds}
-             *
-             * Specifies whether an item's bounds are to appear as selected.
-             *
-             * Paper.js draws the bounds of items with selected bounds on top of
-             * your project. This is very useful when debugging.
-             *
-             * @bean
-             * @type Boolean
-             * @default false
-             *
-             * @example {@paperscript}
-             * var path = new Path.Circle({
-             *     center: [80, 50],
-             *     radius: 40,
-             *     selected: true
-             * });
-             *
-             * path.bounds.selected = true;
-             */
-            isSelected: function() {
-                return !!(this._owner._selection & /*#=*/ItemSelection.BOUNDS);
-            },
-
-            setSelected: function(selected) {
-                var owner = this._owner;
-                if (owner.changeSelection) {
-                    owner.changeSelection(/*#=*/ItemSelection.BOUNDS, selected);
-                }
-            }
-        })
-    );
 });

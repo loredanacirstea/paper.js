@@ -37,7 +37,6 @@ var paper = function(self, undefined) {
 /*#*/ include('../node_modules/straps/straps.js');
 
 /*#*/ include('core/Base.js');
-/*#*/ include('core/Emitter.js');
 /*#*/ include('core/PaperScope.js');
 
 /*#*/ include('util/Formatter.js');
@@ -59,9 +58,8 @@ var paper = function(self, undefined) {
 /*#*/ include('path/PathItem.js');
 /*#*/ include('path/Path.js');
 /*#*/ include('path/CompoundPath.js');
-/*#*/     include('path/PathItem.Boolean.js');
-/*#*/     include('svg/SvgElement.js');
-/*#*/     include('svg/SvgExport.js');
+/*#*/ include('path/PathItem.Boolean.js');
+/*#*/ include('svg/SvgExport.js');
 
 /*#*/ include('export.js');
 return paper;

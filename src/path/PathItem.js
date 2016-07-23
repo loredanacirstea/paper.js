@@ -242,24 +242,9 @@ var PathItem = Item.extend(/** @lends PathItem# */{
         }
     },
 
-    _canComposite: function() {
-        // A path with only a fill or a stroke can be directly blended, but if
-        // it has both, it needs to be drawn into a separate canvas first.
-        return !(this.hasFill() && this.hasStroke());
-    },
 
     _contains: function(point) {
-        // NOTE: point is reverse transformed by _matrix, so we don't need to
-        // apply the matrix here.
-/*#*/ if (__options.nativeContains || !__options.booleanOperations) {
-        // To compare with native canvas approach:
-        var ctx = CanvasProvider.getContext(1, 1);
-        // Use dontFinish to tell _draw to only produce geometries for hit-test.
-        this._draw(ctx, new Base({ dontFinish: true }));
-        var res = ctx.isPointInPath(point.x, point.y, this.getFillRule());
-        CanvasProvider.release(ctx);
-        return res;
-/*#*/ } else { // !__options.nativeContains && __options.booleanOperations
+        // !__options.nativeContains && __options.booleanOperations
         // Check the transformed point against the untransformed (internal)
         // handle bounds, which is the fastest rough bounding box to calculate
         // for a quick check before calculating the actual winding.
@@ -270,7 +255,6 @@ var PathItem = Item.extend(/** @lends PathItem# */{
         return !!(this.getFillRule() === 'evenodd'
                 ? winding.windingL & 1 || winding.windingR & 1
                 : winding.winding);
-/*#*/ } // !__options.nativeContains && __options.booleanOperations
     },
 
     /**
@@ -408,134 +392,6 @@ var PathItem = Item.extend(/** @lends PathItem# */{
             // https://github.com/paperjs/paper.js/issues/874#issuecomment-168332391
             return inter._overlap || inter.isCrossing();
         });
-    },
-
-    /**
-     * Returns the nearest location on the path item to the specified point.
-     *
-     * @param {Point} point the point for which we search the nearest location
-     * @return {CurveLocation} the location on the path that's the closest to
-     * the specified point
-     */
-    getNearestLocation: function(/* point */) {
-        var point = Point.read(arguments),
-            curves = this.getCurves(),
-            minDist = Infinity,
-            minLoc = null;
-        for (var i = 0, l = curves.length; i < l; i++) {
-            var loc = curves[i].getNearestLocation(point);
-            if (loc._distance < minDist) {
-                minDist = loc._distance;
-                minLoc = loc;
-            }
-        }
-        return minLoc;
-    },
-
-    /**
-     * Returns the nearest point on the path item to the specified point.
-     *
-     * @param {Point} point the point for which we search the nearest point
-     * @return {Point} the point on the path that's the closest to the specified
-     * point
-     *
-     * @example {@paperscript height=200}
-     * var star = new Path.Star({
-     *     center: view.center,
-     *     points: 10,
-     *     radius1: 30,
-     *     radius2: 60,
-     *     strokeColor: 'black'
-     * });
-     *
-     * var circle = new Path.Circle({
-     *     center: view.center,
-     *     radius: 3,
-     *     fillColor: 'red'
-     * });
-     *
-     * function onMouseMove(event) {
-     *     // Get the nearest point from the mouse position
-     *     // to the star shaped path:
-     *     var nearestPoint = star.getNearestPoint(event.point);
-     *
-     *     // Move the red circle to the nearest point:
-     *     circle.position = nearestPoint;
-     * }
-     */
-    getNearestPoint: function(/* point */) {
-        var loc = this.getNearestLocation.apply(this, arguments);
-        return loc ? loc.getPoint() : loc;
-    },
-
-    interpolate: function(from, to, factor) {
-        var isPath = !this._children,
-            name = isPath ? '_segments' : '_children',
-            itemsFrom = from[name],
-            itemsTo = to[name],
-            items = this[name];
-        if (!itemsFrom || !itemsTo || itemsFrom.length !== itemsTo.length) {
-            throw new Error('Invalid operands in interpolate() call: ' +
-                    from + ', ' + to);
-        }
-        var current = items.length,
-            length = itemsTo.length;
-        if (current < length) {
-            var ctor = isPath ? Segment : Path;
-            for (var i = current; i < length; i++) {
-                this.add(new ctor());
-            }
-        } else if (current > length) {
-            this[isPath ? 'removeSegments' : 'removeChildren'](length, current);
-        }
-        for (var i = 0; i < length; i++) {
-            items[i].interpolate(itemsFrom[i], itemsTo[i], factor);
-        }
-        if (isPath) {
-            this.setClosed(from._closed);
-        }
-    },
-
-    /**
-     * Compares the geometry of two paths to see if they describe the same
-     * shape, detecting cases where paths start in different segments or even
-     * use different amounts of curves to describe the same shape, as long as
-     * their orientation is the same, and their segments and handles really
-     * result in the same visual appearance of curves.
-     *
-     * @name PathItem#compare
-     * @function
-     *
-     * @param {PathItem} path the path to compare this path's geometry with
-     * @return {Boolean} {@true if two paths describe the shame shape}
-     */
-    compare: function(path) {
-        var ok = false;
-        if (path) {
-            var paths1 = this._children || [this],
-                paths2 = path._children.slice() || [path],
-                length1 = paths1.length,
-                length2 = paths2.length,
-                matched = [],
-                count;
-            ok = true;
-            for (var i1 = length1 - 1; i1 >= 0 && ok; i1--) {
-                var path1 = paths1[i1];
-                ok = false;
-                for (var i2 = length2 - 1; i2 >= 0 && !ok; i2--) {
-                    if (path1.compare(paths2[i2])) {
-                        if (!matched[i2]) {
-                            matched[i2] = true;
-                            count++;
-                        }
-                        ok = true;
-                    }
-                }
-            }
-            // Each path in path2 needs to be matched at least once.
-            ok = ok && count === length2;
-        }
-        return ok;
     },
 
 });

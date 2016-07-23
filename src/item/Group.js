@@ -33,11 +33,5 @@ var Group = Item.extend(/** @lends Group# */{
         this._namedChildren = {};
         if (!this._initialize(arg))
             this.addChildren(Array.isArray(arg) ? arg : arguments);
-    },
-
-
-
-
-
-   
+    }
 });
