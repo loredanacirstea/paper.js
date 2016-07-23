@@ -46,10 +46,6 @@ var paper = function(self, undefined) {
 /*#*/ include('util/Numerical.js');
 /*#*/ include('util/UID.js');
 
-// Include Paper classes, which are later injected into PaperScope by setting
-// them on the 'this' object, e.g.:
-// var Point = Base.extend(...);
-
 /*#*/ include('basic/Point.js');
 /*#*/ include('basic/Size.js');
 /*#*/ include('basic/Rectangle.js');
@@ -61,43 +57,16 @@ var paper = function(self, undefined) {
 /*#*/ include('item/Group.js');
 /*#*/ include('item/Layer.js');
 
-/*#*/ include('item/SymbolItem.js');
-/*#*/ include('item/SymbolDefinition.js');
-/*#*/ include('item/HitResult.js');
-
 /*#*/ include('path/Segment.js');
 /*#*/ include('path/SegmentPoint.js');
 /*#*/ include('path/Curve.js');
 /*#*/ include('path/CurveLocation.js');
 /*#*/ include('path/PathItem.js');
 /*#*/ include('path/Path.js');
-/*#*/ include('path/Path.Constructors.js');
 /*#*/ include('path/CompoundPath.js');
-/*#*/ if (__options.booleanOperations) {
-/*#*/     include('path/PathItem.Boolean.js');
-/*#*/ }
 
-/*#*/ include('dom/DomElement.js');
-/*#*/ include('dom/DomEvent.js');
+/*#*/ include('path/PathItem.Boolean.js');
 
-/*#*/ include('view/View.js');
-/*#*/ include('view/CanvasView.js');
-
-/*#*/ include('event/Event.js');
-/*#*/ include('event/KeyEvent.js');
-/*#*/ include('event/Key.js');
-/*#*/ include('event/MouseEvent.js');
-
-/*#*/ include('tool/ToolEvent.js');
-/*#*/ include('tool/Tool.js');
-
-/*#*/ include('net/Http.js');
-
-/*#*/ include('canvas/CanvasProvider.js');
-/*#*/ include('canvas/BlendMode.js');
-/*#*/ if (__options.load) {
-/*#*/     include('canvas/ProxyContext.js');
-/*#*/ }
 
 /*#*/ include('svg/SvgExport.js');
 

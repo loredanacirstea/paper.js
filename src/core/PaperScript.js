@@ -577,9 +577,7 @@ Base.exports.PaperScript = function() {
         if (document.readyState === 'complete') {
             // Handle it asynchronously
             setTimeout(loadAll);
-        } else {
-            DomEvent.add(window, { load: loadAll });
-        }
+        } 
     }
 
     return {
