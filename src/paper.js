@@ -49,7 +49,6 @@ var paper = function(self, undefined) {
 /*#*/ include('basic/Matrix.js');
 /*#*/ include('basic/Line.js');
 
-/*#*/ include('item/Project.js');
 /*#*/ include('item/Item.js');
 /*#*/ include('item/Group.js');
 

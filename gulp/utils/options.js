@@ -13,7 +13,7 @@
 var execSync = require('child_process').execSync,
     // Require the __options object, so we have access to the version number and
     // make amendments, e.g. the release date.
-    options = require('../../src/options.js');
+    //options = require('../../src/options.js');
 
 function git(command) {
     return execSync('git ' + command).toString().trim();

@@ -226,78 +226,8 @@ var Segment = Base.extend(/** @lends Segment# */{
         this._handleOut._set(0, 0);
     },
 
-    getSelection: function() {
-        return this._selection;
-    },
 
-    setSelection: function(selection) {
-        var oldSelection = this._selection,
-            path = this._path;
-        // Set the selection state even if path is not defined yet, to allow
-        // selected segments to be inserted into paths and make JSON
-        // deserialization work.
-        this._selection = selection = selection || 0;
-        // If the selection state of the segment has changed, we need to let
-        // it's path know and possibly add or remove it from
-        // project._selectionItems
-        if (path && selection !== oldSelection) {
-            path._updateSelection(this, oldSelection, selection);
-            // Let path know that we changed something and the view should be
-            // redrawn
-        }
-    },
-
-    changeSelection: function(flag, selected) {
-        var selection = this._selection;
-        this.setSelection(selected ? selection | flag : selection & ~flag);
-    },
-
-    /**
-     * Specifies whether the segment is selected.
-     *
-     * @bean
-     * @type Boolean
-     *
-     * @example {@paperscript}
-     * var path = new Path.Circle({
-     *     center: [80, 50],
-     *     radius: 40
-     * });
-     *
-     * // Select the third segment point:
-     * path.segments[2].selected = true;
-     */
-    isSelected: function() {
-        return !!(this._selection & /*#=*/SegmentSelection.ALL);
-    },
-
-    setSelected: function(selected) {
-        this.changeSelection(/*#=*/SegmentSelection.ALL, selected);
-    },
-
-    /**
-     * {@grouptitle Hierarchy}
-     *
-     * The index of the segment in the {@link Path#segments} array that the
-     * segment belongs to.
-     *
-     * @bean
-     * @type Number
-     */
-    getIndex: function() {
-        return this._index !== undefined ? this._index : null;
-    },
-
-    /**
-     * The path that the segment belongs to.
-     *
-     * @bean
-     * @type Path
-     */
-    getPath: function() {
-        return this._path || null;
-    },
-
+  
     /**
      * The curve that the segment belongs to. For the last segment of an open
      * path, the previous segment is returned.
@@ -318,20 +248,7 @@ var Segment = Base.extend(/** @lends Segment# */{
         return null;
     },
 
-    /**
-     * The curve location that describes this segment's position on the path.
-     *
-     * @bean
-     * @type CurveLocation
-     */
-    getLocation: function() {
-        var curve = this.getCurve();
-        return curve
-                // Determine whether the parameter for this segment is 0 or 1.
-                ? new CurveLocation(curve, this === curve._segment1 ? 0 : 1)
-                : null;
-    },
-
+  
     /**
      * {@grouptitle Sibling Segments}
      *
@@ -348,140 +265,7 @@ var Segment = Base.extend(/** @lends Segment# */{
                 || this._path._closed && segments[0]) || null;
     },
 
-    /**
-     * Smooths the bezier curves that pass through this segment by taking into
-     * account the segment's position and distance to the neighboring segments
-     * and changing the direction and length of the segment's handles
-     * accordingly without moving the segment itself.
-     *
-     * Two different smoothing methods are available:
-     *
-     * - `'catmull-rom'` uses the Catmull-Rom spline to smooth the segment.
-     *
-     *     The optionally passed factor controls the knot parametrization of the
-     *     algorithm:
-     *
-     *     - `0.0`: the standard, uniform Catmull-Rom spline
-     *     - `0.5`: the centripetal Catmull-Rom spline, guaranteeing no
-     *         self-intersections
-     *     - `1.0`: the chordal Catmull-Rom spline
-     *
-     * - `'geometric'` use a simple heuristic and empiric geometric method to
-     *     smooth the segment's handles. The handles were weighted, meaning that
-     *     big differences in distances between the segments will lead to
-     *     probably undesired results.
-     *
-     *     The optionally passed factor defines the tension parameter (`0...1`),
-     *     controlling the amount of smoothing as a factor by which to scale
-     *     each handle.
-     *
-     * @option [options.type='catmull-rom'] {String} the type of smoothing
-     *     method: {@values 'catmull-rom', 'geometric'}
-     * @option options.factor {Number} the factor parameterizing the smoothing
-     *     method — default: `0.5` for `'catmull-rom'`, `0.4` for `'geometric'`
-     *
-     * @param {Object} [options] the smoothing options
-     *
-     * @see PathItem#smooth([options])
-     */
-    smooth: function(options, _first, _last) {
-        // _first = _last = false;
-        var opts = options || {},
-            type = opts.type,
-            factor = opts.factor,
-            prev = this.getPrevious(),
-            next = this.getNext(),
-            // Some precalculations valid for both 'catmull-rom' and 'geometric'
-            p0 = (prev || this)._point,
-            p1 = this._point,
-            p2 = (next || this)._point,
-            d1 = p0.getDistance(p1),
-            d2 = p1.getDistance(p2);
-        if (!type || type === 'catmull-rom') {
-            // Implementation of by Catmull-Rom splines with factor parameter
-            // based on work by @nicholaswmin:
-            // https://github.com/nicholaswmin/VectorTests
-            // Using these factors produces different types of splines:
-            // 0.0: the standard, uniform Catmull-Rom spline
-            // 0.5: the centripetal Catmull-Rom spline, guaranteeing no self-
-            //      intersections
-            // 1.0: the chordal Catmull-Rom spline
-            var a = factor === undefined ? 0.5 : factor,
-                d1_a = Math.pow(d1, a),
-                d1_2a = d1_a * d1_a,
-                d2_a = Math.pow(d2, a),
-                d2_2a = d2_a * d2_a;
-            if (!_first && prev) {
-                var A = 2 * d2_2a + 3 * d2_a * d1_a + d1_2a,
-                    N = 3 * d2_a * (d2_a + d1_a);
-                this.setHandleIn(N !== 0
-                    ? new Point(
-                        (d2_2a * p0._x + A * p1._x - d1_2a * p2._x) / N - p1._x,
-                        (d2_2a * p0._y + A * p1._y - d1_2a * p2._y) / N - p1._y)
-                    : new Point());
-            }
-            if (!_last && next) {
-                var A = 2 * d1_2a + 3 * d1_a * d2_a + d2_2a,
-                    N = 3 * d1_a * (d1_a + d2_a);
-                this.setHandleOut(N !== 0
-                    ? new Point(
-                        (d1_2a * p2._x + A * p1._x - d2_2a * p0._x) / N - p1._x,
-                        (d1_2a * p2._y + A * p1._y - d2_2a * p0._y) / N - p1._y)
-                    : new Point());
-            }
-        } else if (type === 'geometric') {
-            // Geometric smoothing approach based on:
-            // http://www.antigrain.com/research/bezier_interpolation/
-            // http://scaledinnovation.com/analytics/splines/aboutSplines.html
-            // http://bseth99.github.io/projects/animate/2-bezier-curves.html
-            if (prev && next) {
-                var vector = p0.subtract(p2),
-                    t = factor === undefined ? 0.4 : factor,
-                    k = t * d1 / (d1 + d2);
-                if (!_first)
-                    this.setHandleIn(vector.multiply(k));
-                if (!_last)
-                    this.setHandleOut(vector.multiply(k - t));
-            }
-        } else {
-            throw new Error('Smoothing method \'' + type + '\' not supported.');
-        }
-    },
 
-    /**
-     * The previous segment in the {@link Path#segments} array that the
-     * segment belongs to. If the segments belongs to a closed path, the last
-     * segment is returned for the first segment of the path.
-     *
-     * @bean
-     * @type Segment
-     */
-    getPrevious: function() {
-        var segments = this._path && this._path._segments;
-        return segments && (segments[this._index - 1]
-                || this._path._closed && segments[segments.length - 1]) || null;
-    },
-
-    /**
-     * Checks if the this is the first segment in the {@link Path#segments}
-     * array.
-     *
-     * @return {Boolean} {@true if this is the first segment}
-     */
-    isFirst: function() {
-        return !this._index;
-    },
-
-    /**
-     * Checks if the this is the last segment in the {@link Path#segments}
-     * array.
-     *
-     * @return {Boolean} {@true if this is the last segment}
-     */
-    isLast: function() {
-        var path = this._path;
-        return path && this._index === path._segments.length - 1 || false;
-    },
 
     /**
      * Reverses the {@link #handleIn} and {@link #handleOut} vectors of this

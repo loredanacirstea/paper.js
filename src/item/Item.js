@@ -759,7 +759,6 @@ new function() { // Injection scope for various item event handlers
                 //if (notifySelf)
                 //    this._changed(/*#=*/Change.INSERTION);
             }
-            //this._changed(/*#=*/Change.CHILDREN);
         } else {
             items = null;
         }

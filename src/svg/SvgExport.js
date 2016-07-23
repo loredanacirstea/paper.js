@@ -194,43 +194,4 @@ new function() {
             return exportDefinitions(exportSVG(this, options, true), options);
         }
     });
-
-    Project.inject({
-        exportSVG: function(options) {
-            options = setOptions(options);
-            var children = this._children,
-                view = this.getView(),
-                bounds = Base.pick(options.bounds, 'view'),
-                mx = options.matrix || bounds === 'view' && view._matrix,
-                matrix = mx && Matrix.read([mx]),
-                rect = bounds === 'view'
-                    ? new Rectangle([0, 0], view.getViewSize())
-                    : bounds === 'content'
-                        ? Item._getBounds(children, matrix, { stroke: true })
-                        : Rectangle.read([bounds], 0, { readNull: true }),
-                attrs = {
-                    version: '1.1',
-                    xmlns: SvgElement.svg,
-                    'xmlns:xlink': SvgElement.xlink,
-                };
-            if (rect) {
-                attrs.width = rect.width;
-                attrs.height = rect.height;
-                if (rect.x || rect.y)
-                    attrs.viewBox = formatter.rectangle(rect);
-            }
-            var node = SvgElement.create('svg', attrs, formatter),
-                parent = node;
-            // If the view has a transformation, wrap all layers in a group with
-            // that transformation applied to.
-            if (matrix && !matrix.isIdentity()) {
-                parent = node.appendChild(SvgElement.create('g',
-                        getTransform(matrix), formatter));
-            }
-            for (var i = 0, l = children.length; i < l; i++) {
-                parent.appendChild(exportSVG(children[i], options, true));
-            }
-            return exportDefinitions(node, options);
-        }
-    });
 };

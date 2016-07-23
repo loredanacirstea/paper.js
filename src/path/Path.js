@@ -65,22 +65,13 @@ var Path = PathItem.extend(/** @lends Path# */{
         this._initialize(!segments && arg);
     },
 
-    _equals: function(item) {
-        return this._closed === item._closed
-                && Base.equals(this._segments, item._segments);
-    },
 
     copyContent: function(source) {
         this.setSegments(source._segments);
         this._closed = source._closed;
     },
 
-    /**
-     * The segments contained within the path.
-     *
-     * @bean
-     * @type Segment[]
-     */
+
     getSegments: function() {
         return this._segments;
     },
@@ -105,32 +96,16 @@ var Path = PathItem.extend(/** @lends Path# */{
  
     },
 
-    /**
-     * The first Segment contained within the path.
-     *
-     * @bean
-     * @type Segment
-     */
+
     getFirstSegment: function() {
         return this._segments[0];
     },
 
-    /**
-     * The last Segment contained within the path.
-     *
-     * @bean
-     * @type Segment
-     */
     getLastSegment: function() {
         return this._segments[this._segments.length - 1];
     },
 
-    /**
-     * The curves contained within the path.
-     *
-     * @bean
-     * @type Curve[]
-     */
+
     getCurves: function() {
         var curves = this._curves,
             segments = this._segments;
@@ -145,44 +120,17 @@ var Path = PathItem.extend(/** @lends Path# */{
         return curves;
     },
 
-    /**
-     * The first Curve contained within the path.
-     *
-     * @bean
-     * @type Curve
-     */
     getFirstCurve: function() {
         return this.getCurves()[0];
     },
 
-    /**
-     * The last Curve contained within the path.
-     *
-     * @bean
-     * @type Curve
-     */
+
     getLastCurve: function() {
         var curves = this.getCurves();
         return curves[curves.length - 1];
     },
 
-    /**
-     * Specifies whether the path is closed. If it is closed, Paper.js connects
-     * the first and last segments.
-     *
-     * @bean
-     * @type Boolean
-     *
-     * @example {@paperscript}
-     * var myPath = new Path();
-     * myPath.strokeColor = 'black';
-     * myPath.add(new Point(50, 75));
-     * myPath.add(new Point(100, 25));
-     * myPath.add(new Point(150, 75));
-     *
-     * // Close the path:
-     * myPath.closed = true;
-     */
+
     isClosed: function() {
         return this._closed;
     },
@@ -282,12 +230,7 @@ var Path = PathItem.extend(/** @lends Path# */{
         return true;
     },
 
-    /**
-     * Private method that adds segments to the segment list. It assumes that
-     * the passed object is an array of segments already and does not perform
-     * any checks. If a curves list was requested, it will be kept in sync with
-     * the segments list automatically.
-     */
+
     _add: function(segs, index) {
         // Local short-cuts:
         var segments = this._segments,
@@ -345,9 +288,7 @@ var Path = PathItem.extend(/** @lends Path# */{
         return segs;
     },
 
-    /**
-     * Adjusts segments of curves before and after inserted / removed segments.
-     */
+
     _adjustCurves: function(start, end) {
         var segments = this._segments,
             curves = this._curves,
@@ -370,10 +311,7 @@ var Path = PathItem.extend(/** @lends Path# */{
         }
     },
 
-    /**
-     * Returns the amount of curves this path item is supposed to have, based
-     * on its amount of #segments and #closed state.
-     */
+
     _countCurves: function() {
         var length = this._segments.length;
         // Reduce length by one if it's an open path:
@@ -381,72 +319,7 @@ var Path = PathItem.extend(/** @lends Path# */{
     },
 
     // DOCS: find a way to document the variable segment parameters of Path#add
-    /**
-     * Adds one or more segments to the end of the {@link #segments} array of
-     * this path.
-     *
-     * @param {Segment|Point} segment the segment or point to be added.
-     * @return {Segment} the added segment. This is not necessarily the same
-     * object, e.g. if the segment to be added already belongs to another path
-     *
-     * @example {@paperscript}
-     * // Adding segments to a path using point objects:
-     * var path = new Path({
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Add a segment at {x: 30, y: 75}
-     * path.add(new Point(30, 75));
-     *
-     * // Add two segments in one go at {x: 100, y: 20}
-     * // and {x: 170, y: 75}:
-     * path.add(new Point(100, 20), new Point(170, 75));
-     *
-     * @example {@paperscript}
-     * // Adding segments to a path using arrays containing number pairs:
-     * var path = new Path({
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Add a segment at {x: 30, y: 75}
-     * path.add([30, 75]);
-     *
-     * // Add two segments in one go at {x: 100, y: 20}
-     * // and {x: 170, y: 75}:
-     * path.add([100, 20], [170, 75]);
-     *
-     * @example {@paperscript}
-     * // Adding segments to a path using objects:
-     * var path = new Path({
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Add a segment at {x: 30, y: 75}
-     * path.add({x: 30, y: 75});
-     *
-     * // Add two segments in one go at {x: 100, y: 20}
-     * // and {x: 170, y: 75}:
-     * path.add({x: 100, y: 20}, {x: 170, y: 75});
-     *
-     * @example {@paperscript}
-     * // Adding a segment with handles to a path:
-     * var path = new Path({
-     *     strokeColor: 'black'
-     * });
-     *
-     * path.add(new Point(30, 75));
-     *
-     * // Add a segment with handles:
-     * var point = new Point(100, 20);
-     * var handleIn = new Point(-50, 0);
-     * var handleOut = new Point(50, 0);
-     * var added = path.add(new Segment(point, handleIn, handleOut));
-     *
-     * // Select the added segment, so we can see its handles:
-     * added.selected = true;
-     *
-     * path.add(new Point(170, 75));
-     */
+
     add: function(segment1 /*, segment2, ... */) {
         return arguments.length > 1 && typeof segment1 !== 'number'
             // addSegments
@@ -455,42 +328,7 @@ var Path = PathItem.extend(/** @lends Path# */{
             : this._add([ Segment.read(arguments) ])[0];
     },
 
-    /**
-     * Inserts one or more segments at a given index in the list of this path's
-     * segments.
-     *
-     * @param {Number} index the index at which to insert the segment
-     * @param {Segment|Point} segment the segment or point to be inserted.
-     * @return {Segment} the added segment. This is not necessarily the same
-     * object, e.g. if the segment to be added already belongs to another path
-     *
-     * @example {@paperscript}
-     * // Inserting a segment:
-     * var myPath = new Path();
-     * myPath.strokeColor = 'black';
-     * myPath.add(new Point(50, 75));
-     * myPath.add(new Point(150, 75));
-     *
-     * // Insert a new segment into myPath at index 1:
-     * myPath.insert(1, new Point(100, 25));
-     *
-     * // Select the segment which we just inserted:
-     * myPath.segments[1].selected = true;
-     *
-     * @example {@paperscript}
-     * // Inserting multiple segments:
-     * var myPath = new Path();
-     * myPath.strokeColor = 'black';
-     * myPath.add(new Point(50, 75));
-     * myPath.add(new Point(150, 75));
-     *
-     * // Insert two segments into myPath at index 1:
-     * myPath.insert(1, [80, 25], [120, 25]);
-     *
-     * // Select the segments which we just inserted:
-     * myPath.segments[1].selected = true;
-     * myPath.segments[2].selected = true;
-     */
+
     insert: function(index, segment1 /*, segment2, ... */) {
         return arguments.length > 2 && typeof segment1 !== 'number'
             // insertSegments
@@ -507,127 +345,22 @@ var Path = PathItem.extend(/** @lends Path# */{
         return this._add([ Segment.read(arguments, 1) ], index)[0];
     },
 
-    /**
-     * Adds an array of segments (or types that can be converted to segments)
-     * to the end of the {@link #segments} array.
-     *
-     * @param {Segment[]} segments
-     * @return {Segment[]} an array of the added segments. These segments are
-     * not necessarily the same objects, e.g. if the segment to be added already
-     * belongs to another path
-     *
-     * @example {@paperscript}
-     * // Adding an array of Point objects:
-     * var path = new Path({
-     *     strokeColor: 'black'
-     * });
-     * var points = [new Point(30, 50), new Point(170, 50)];
-     * path.addSegments(points);
-     *
-     * @example {@paperscript}
-     * // Adding an array of [x, y] arrays:
-     * var path = new Path({
-     *     strokeColor: 'black'
-     * });
-     * var array = [[30, 75], [100, 20], [170, 75]];
-     * path.addSegments(array);
-     *
-     * @example {@paperscript}
-     * // Adding segments from one path to another:
-     *
-     * var path = new Path({
-     *     strokeColor: 'black'
-     * });
-     * path.addSegments([[30, 75], [100, 20], [170, 75]]);
-     *
-     * var path2 = new Path();
-     * path2.strokeColor = 'red';
-     *
-     * // Add the second and third segments of path to path2:
-     * path2.add(path.segments[1], path.segments[2]);
-     *
-     * // Move path2 30pt to the right:
-     * path2.position.x += 30;
-     */
+
     addSegments: function(segments) {
         return this._add(Segment.readList(segments));
     },
 
-    /**
-     * Inserts an array of segments at a given index in the path's
-     * {@link #segments} array.
-     *
-     * @param {Number} index the index at which to insert the segments
-     * @param {Segment[]} segments the segments to be inserted
-     * @return {Segment[]} an array of the added segments. These segments are
-     * not necessarily the same objects, e.g. if the segment to be added already
-     * belongs to another path
-     */
+
     insertSegments: function(index, segments) {
         return this._add(Segment.readList(segments), index);
     },
 
-    /**
-     * Removes the segment at the specified index of the path's
-     * {@link #segments} array.
-     *
-     * @param {Number} index the index of the segment to be removed
-     * @return {Segment} the removed segment
-     *
-     * @example {@paperscript}
-     * // Removing a segment from a path:
-     *
-     * // Create a circle shaped path at { x: 80, y: 50 }
-     * // with a radius of 35:
-     * var path = new Path.Circle({
-     *     center: new Point(80, 50),
-     *     radius: 35,
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Remove its second segment:
-     * path.removeSegment(1);
-     *
-     * // Select the path, so we can see its segments:
-     * path.selected = true;
-     */
+
     removeSegment: function(index) {
         return this.removeSegments(index, index + 1)[0] || null;
     },
 
-    /**
-     * Removes all segments from the path's {@link #segments} array.
-     *
-     * @name Path#removeSegments
-     * @alias Path#clear
-     * @function
-     * @return {Segment[]} an array containing the removed segments
-     */
-    /**
-     * Removes the segments from the specified `from` index to the `to` index
-     * from the path's {@link #segments} array.
-     *
-     * @param {Number} from the beginning index, inclusive
-     * @param {Number} [to=segments.length] the ending index, exclusive
-     * @return {Segment[]} an array containing the removed segments
-     *
-     * @example {@paperscript}
-     * // Removing segments from a path:
-     *
-     * // Create a circle shaped path at { x: 80, y: 50 }
-     * // with a radius of 35:
-     * var path = new Path.Circle({
-     *     center: new Point(80, 50),
-     *     radius: 35,
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Remove the segments from index 1 till index 2:
-     * path.removeSegments(1, 2);
-     *
-     * // Select the path, so we can see its segments:
-     * path.selected = true;
-     */
+
     removeSegments: function(start, end, _includeCurves) {
         start = start || 0;
         end = Base.pick(end, this._segments.length);
@@ -678,23 +411,7 @@ var Path = PathItem.extend(/** @lends Path# */{
     clear: '#removeSegments',
 
 
-    /**
-     * The approximate length of the path.
-     *
-     * @bean
-     * @type Number
-     */
-    getLength: function() {
-        if (this._length == null) {
-            var curves = this.getCurves(),
-                length = 0;
-            for (var i = 0, l = curves.length; i < l; i++)
-                length += curves[i].getLength();
-            this._length = length;
-        }
-        return this._length;
-    },
-
+   
     /**
      * The area that the path's geometry is covering. Self-intersecting paths
      * can contain sub-areas that cancel each other out.
@@ -724,194 +441,6 @@ var Path = PathItem.extend(/** @lends Path# */{
     },
 
   
-    /**
-     * Splits the path at the given offset or location. After splitting, the
-     * path will be open. If the path was open already, splitting will result in
-     * two paths.
-     *
-     * @param {Number|CurveLocation} location the offset or location at which to
-     *     split the path
-     * @return {Path} the newly created path after splitting, if any
-     *
-     * @example {@paperscript}
-     * var path = new Path.Circle({
-     *     center: view.center,
-     *     radius: 40,
-     *     strokeColor: 'black'
-     * });
-     *
-     * var pointOnCircle = view.center + {
-     *     length: 40,
-     *     angle: 30
-     * };
-     *
-     * var location = path.getNearestLocation(pointOnCircle);
-     *
-     * path.splitAt(location);
-     * path.lastSegment.selected = true;
-     *
-     * @example {@paperscript} // Splitting an open path
-     * // Draw a V shaped path:
-     * var path = new Path([20, 20], [50, 80], [80, 20]);
-     * path.strokeColor = 'black';
-     *
-     * // Split the path half-way:
-     * var path2 = path.splitAt(path2.length / 2);
-     *
-     * // Give the resulting path a red stroke-color
-     * // and move it 20px to the right:
-     * path2.strokeColor = 'red';
-     * path2.position.x += 20;
-     *
-     * @example {@paperscript} // Splitting a closed path
-     * var path = new Path.Rectangle({
-     *     from: [20, 20],
-     *     to: [80, 80],
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Split the path half-way:
-     * path.splitAt(path.length / 2);
-     *
-     * // Move the first segment, to show where the path
-     * // was split:
-     * path.firstSegment.point.x += 20;
-     *
-     * // Select the first segment:
-     * path.firstSegment.selected = true;
-     */
-    splitAt: function(location) {
-        var loc = typeof location === 'number'
-                ? this.getLocationAt(location) : location,
-            index = loc && loc.index,
-            time = loc && loc.time,
-            tMin = /*#=*/Numerical.CURVETIME_EPSILON,
-            tMax = 1 - tMin;
-        if (time >= tMax) {
-            // time == 1 is the same location as time == 0 and index++
-            index++;
-            time = 0;
-        }
-        var curves = this.getCurves();
-        if (index >= 0 && index < curves.length) {
-            // Only divide curves if we're not on an existing segment already.
-            if (time >= tMin) {
-                // Divide the curve with the index at the given curve-time.
-                // Increase because dividing adds more segments to the path.
-                curves[index++].divideAtTime(time);
-            }
-            // Create the new path with the segments to the right of given
-            // curve-time, which are removed from the current path. Pass true
-            // for includeCurves, since we want to preserve and move them to
-            // the new path through _add(), allowing us to have CurveLocation
-            // keep the connection to the new path through moved curves.
-            var segs = this.removeSegments(index, this._segments.length, true),
-                path;
-            if (this._closed) {
-                // If the path is closed, open it and move the segments round,
-                // otherwise create two paths.
-                this.setClosed(false);
-                // Just have path point to this. The moving around of segments
-                // will happen below.
-                path = this;
-            } else {
-                path = new Path(Item.NO_INSERT);
-                path.insertAbove(this);
-                path.copyAttributes(this);
-            }
-            path._add(segs, 0);
-            // Add dividing segment again. In case of a closed path, that's the
-            // beginning segment again at the end, since we opened it.
-            this.addSegment(segs[0]);
-            return path;
-        }
-        return null;
-    },
-
-    /**
-     * @deprecated use use {@link #splitAt(offset)} instead.
-     */
-    split: function(index, time) {
-        var curve,
-            location = time === undefined ? index
-                : (curve = this.getCurves()[index])
-                    && curve.getLocationAtTime(time);
-        return location != null ? this.splitAt(location) : null;
-    },
-
-    /**
-     * Joins the path with the other specified path, which will be removed in
-     * the process. They can be joined if the first or last segments of either
-     * path lie in the same location. Locations are optionally compare with a
-     * provide `tolerance` value.
-     *
-     * If `null` or `this` is passed as the other path, the path will be joined
-     * with itself if the first and last segment are in the same location.
-     *
-     * @param {Path} path the path to join this path with; `null` or `this` to
-     *     join the path with itself
-     * @param {Number} [tolerance=0] the tolerance with which to decide if two
-     *     segments are to be considered the same location when joining
-     *
-     * @example {@paperscript}
-     * // Joining two paths:
-     * var path = new Path({
-     *     segments: [[30, 25], [30, 75]],
-     *     strokeColor: 'black'
-     * });
-     *
-     * var path2 = new Path({
-     *     segments: [[200, 25], [200, 75]],
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Join the paths:
-     * path.join(path2);
-     *
-     * @example {@paperscript}
-     * // Joining two paths that share a point at the start or end of their
-     * // segments array:
-     * var path = new Path({
-     *     segments: [[30, 25], [30, 75]],
-     *     strokeColor: 'black'
-     * });
-     *
-     * var path2 = new Path({
-     *     segments: [[30, 25], [80, 25]],
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Join the paths:
-     * path.join(path2);
-     *
-     * // After joining, path with have 3 segments, since it
-     * // shared its first segment point with the first
-     * // segment point of path2.
-     *
-     * // Select the path to show that they have joined:
-     * path.selected = true;
-     *
-     * @example {@paperscript}
-     * // Joining two paths that connect at two points:
-     * var path = new Path({
-     *     segments: [[30, 25], [80, 25], [80, 75]],
-     *     strokeColor: 'black'
-     * });
-     *
-     * var path2 = new Path({
-     *     segments: [[30, 25], [30, 75], [80, 75]],
-     *     strokeColor: 'black'
-     * });
-     *
-     * // Join the paths:
-     * path.join(path2);
-     *
-     * // Because the paths were joined at two points, the path is closed
-     * // and has 4 segments.
-     *
-     * // Select the path to show that they have joined:
-     * path.selected = true;
-     */
     join: function(path, tolerance) {
         var epsilon = tolerance || 0;
         if (path && path !== this) {
@@ -957,10 +486,7 @@ var Path = PathItem.extend(/** @lends Path# */{
         return this;
     },
 
-    /**
-     * Reduces the path by removing curves that have a length of 0,
-     * and unnecessary segments between two collinear flat curves.
-     */
+
     reduce: function(options) {
         var curves = this.getCurves(),
             // TODO: Find a better name, to not confuse with PathItem#simplify()
@@ -996,280 +522,7 @@ var Path = PathItem.extend(/** @lends Path# */{
         this._curves = null;
     },
 
-    // NOTE: Documentation is in PathItem#flatten()
-    flatten: function(flatness) {
-        // Use PathIterator to subdivide the curves into parts that are flat
-        // enough, as specified by `flatness` / Curve.isFlatEnough():
-        var iterator = new PathIterator(this, flatness || 0.25, 256, true),
-            parts = iterator.parts,
-            length = parts.length,
-            segments = [];
-        for (var i = 0; i < length; i++) {
-            segments.push(new Segment(parts[i].curve.slice(0, 2)));
-        }
-        if (!this._closed && length > 0) {
-            // We need to explicitly add the end point of the last curve on open paths.
-            segments.push(new Segment(parts[length - 1].curve.slice(6)));
-        }
-        this.setSegments(segments);
-    },
 
-    // NOTE: Documentation is in PathItem#simplify()
-    simplify: function(tolerance) {
-        var segments = new PathFitter(this).fit(tolerance || 2.5);
-        if (segments)
-            this.setSegments(segments);
-        return !!segments;
-    },
-
-    // NOTE: Documentation is in PathItem#smooth()
-    smooth: function(options) {
-        var that = this,
-            opts = options || {},
-            type = opts.type || 'asymmetric',
-            segments = this._segments,
-            length = segments.length,
-            closed = this._closed;
-
-        // Helper method to pick the right from / to indices.
-        // Supports numbers and segment objects.
-        // For numbers, the `to` index is exclusive, while for segments and
-        // curves, it is inclusive, handled by the `offset` parameter.
-        function getIndex(value, _default) {
-            // Support both Segment and Curve through #index getter.
-            var index = value && value.index;
-            if (index != null) {
-                // Make sure the segment / curve is not from a wrong path.
-                var path = value.path;
-                if (path && path !== that)
-                    throw new Error(value._class + ' ' + index + ' of ' + path
-                            + ' is not part of ' + that);
-                // Add offset of 1 to curves to reach their end segment.
-                if (_default && value instanceof Curve)
-                    index++;
-            } else {
-                index = typeof value === 'number' ? value : _default;
-            }
-            // Handle negative values based on whether a path is open or not:
-            // Ranges on closed paths are allowed to wrapped around the
-            // beginning/end (e.g. start near the end, end near the beginning),
-            // while ranges on open paths stay within the path's open range.
-            return Math.min(index < 0 && closed
-                    ? index % length
-                    : index < 0 ? index + length : index, length - 1);
-        }
-
-        var loop = closed && opts.from === undefined && opts.to === undefined,
-            from = getIndex(opts.from, 0),
-            to = getIndex(opts.to, length - 1);
-
-        if (from > to) {
-            if (closed) {
-                from -= length;
-            } else {
-                var tmp = from;
-                from = to;
-                to = tmp;
-            }
-        }
-        if (/^(?:asymmetric|continuous)$/.test(type)) {
-            // Continuous smoothing approach based on work by Lubos Brieda,
-            // Particle In Cell Consulting LLC, but further simplified by
-            // addressing handle symmetry across segments, and the possibility
-            // to process x and y coordinates simultaneously. Also added
-            // handling of closed paths.
-            // https://www.particleincell.com/2012/bezier-splines/
-            //
-            // We use different parameters for the two supported smooth methods
-            // that use this algorithm: continuous and asymmetric. asymmetric
-            // was the only approach available in v0.9.25 & below.
-            var asymmetric = type === 'asymmetric',
-                min = Math.min,
-                amount = to - from + 1,
-                n = amount - 1,
-                // Overlap by up to 4 points on closed paths since a current
-                // segment is affected by its 4 neighbors on both sides (?).
-                padding = loop ? min(amount, 4) : 1,
-                paddingLeft = padding,
-                paddingRight = padding,
-                knots = [];
-            if (!closed) {
-                // If the path is open and a range is defined, try using a
-                // padding of 1 on either side.
-                paddingLeft = min(1, from);
-                paddingRight = min(1, length - to - 1);
-            }
-            // Set up the knots array now, taking the paddings into account.
-            n += paddingLeft + paddingRight;
-            if (n <= 1)
-                return;
-            for (var i = 0, j = from - paddingLeft; i <= n; i++, j++) {
-                knots[i] = segments[(j < 0 ? j + length : j) % length]._point;
-            }
-
-            // In the algorithm we treat these 3 cases:
-            // - left most segment (L)
-            // - internal segments (I)
-            // - right most segment (R)
-            //
-            // In both the continuous and asymmetric method, c takes these
-            // values and can hence be removed from the loop starting in n - 2:
-            // c = 1 (L), 1 (I), 0 (R)
-            //
-            // continuous:
-            // a = 0 (L), 1 (I), 2 (R)
-            // b = 2 (L), 4 (I), 7 (R)
-            // u = 1 (L), 4 (I), 8 (R)
-            // v = 2 (L), 2 (I), 1 (R)
-            //
-            // asymmetric:
-            // a = 0 (L), 1 (I), 1 (R)
-            // b = 2 (L), 4 (I), 2 (R)
-            // u = 1 (L), 4 (I), 3 (R)
-            // v = 2 (L), 2 (I), 0 (R)
-
-            // (L): u = 1, v = 2
-            var x = knots[0]._x + 2 * knots[1]._x,
-                y = knots[0]._y + 2 * knots[1]._y,
-                f = 2,
-                n_1 = n - 1,
-                rx = [x],
-                ry = [y],
-                rf = [f],
-                px = [],
-                py = [];
-            // Solve with the Thomas algorithm
-            for (var i = 1; i < n; i++) {
-                var internal = i < n_1,
-                    //  internal--(I)  asymmetric--(R) (R)--continuous
-                    a = internal ? 1 : asymmetric ? 1 : 2,
-                    b = internal ? 4 : asymmetric ? 2 : 7,
-                    u = internal ? 4 : asymmetric ? 3 : 8,
-                    v = internal ? 2 : asymmetric ? 0 : 1,
-                    m = a / f;
-                f = rf[i] = b - m;
-                x = rx[i] = u * knots[i]._x + v * knots[i + 1]._x - m * x;
-                y = ry[i] = u * knots[i]._y + v * knots[i + 1]._y - m * y;
-            }
-
-            px[n_1] = rx[n_1] / rf[n_1];
-            py[n_1] = ry[n_1] / rf[n_1];
-            for (var i = n - 2; i >= 0; i--) {
-                px[i] = (rx[i] - px[i + 1]) / rf[i];
-                py[i] = (ry[i] - py[i + 1]) / rf[i];
-            }
-            px[n] = (3 * knots[n]._x - px[n_1]) / 2;
-            py[n] = (3 * knots[n]._y - py[n_1]) / 2;
-
-            // Now update the segments
-            for (var i = paddingLeft, max = n - paddingRight, j = from;
-                    i <= max; i++, j++) {
-                var segment = segments[j < 0 ? j + length : j],
-                    pt = segment._point,
-                    hx = px[i] - pt._x,
-                    hy = py[i] - pt._y;
-                if (loop || i < max)
-                    segment.setHandleOut(hx, hy);
-                if (loop || i > paddingLeft)
-                    segment.setHandleIn(-hx, -hy);
-            }
-        } else {
-            // All other smoothing methods are handled directly on the segments:
-            for (var i = from; i <= to; i++) {
-                segments[i < 0 ? i + length : i].smooth(opts,
-                        !loop && i === from, !loop && i === to);
-            }
-        }
-    },
-
-    // TODO: reduceSegments([flatness])
-
-
-    toPath: '#clone',
-
-    // NOTE: Documentation is in PathItem#compare()
-    compare: function compare(path) {
-        // If a compound-path is involved, redirect to PathItem#compare()
-        if (!path || path instanceof CompoundPath)
-            return compare.base.call(this, path);
-        var curves1 = this.getCurves(),
-            curves2 = path.getCurves(),
-            length1 = curves1.length,
-            length2 = curves2.length;
-        if (!length1 || !length2) {
-            // If one path defines curves and the other doesn't, we can't have
-            // matching geometries.
-            return length1 ^ length2;
-        }
-        var v1 = curves1[0].getValues(),
-            values2 = [],
-            pos1 = 0, pos2,
-            end1 = 0, end2;
-        // First, loop through curves2, looking for the start of the overlapping
-        // sequence with curves1[0]. Also cache curve values for later reuse.
-        for (var i = 0; i < length2; i++) {
-            var v2 = curves2[i].getValues();
-            values2.push(v2);
-            var overlaps = Curve.getOverlaps(v1, v2);
-            if (overlaps) {
-                // If the overlap doesn't start at the beginning of v2, then it
-                // can only be a partial overlap with curves2[0], and the start
-                // will be at curves2[length2 - 1]:
-                pos2 = !i && overlaps[0][0] > 0 ? length2 - 1 : i;
-                // Set end2 to the start of the first overlap on curves2, so
-                // connection checks further down can work.
-                end2 = overlaps[0][1];
-                break;
-            }
-        }
-        // Now loop through both curve arrays, find their overlaps, verify that
-        // they keep joining, and see if we end back at the start on both paths.
-        var abs = Math.abs,
-            epsilon = /*#=*/Numerical.CURVETIME_EPSILON,
-            v2 = values2[pos2],
-            start2;
-        while (v1 && v2) {
-            var overlaps = Curve.getOverlaps(v1, v2);
-            if (overlaps) {
-                // Check that the overlaps are joining on curves1.
-                var t1 = overlaps[0][0];
-                if (abs(t1 - end1) < epsilon) {
-                    end1 = overlaps[1][0];
-                    if (end1 === 1) {
-                        // Skip to the next curve if we're at the end of the
-                        // current, and set v1 to null if at the end of curves1.
-                        v1 = ++pos1 < length1 ? curves1[pos1].getValues() : null;
-                        end1 = 0;
-                    }
-                    // Check that the overlaps are joining on curves2.
-                    var t2 = overlaps[0][1];
-                    if (abs(t2 - end2) < epsilon) {
-                        if (!start2)
-                            start2 = [pos2, t2];
-                        end2 = overlaps[1][1];
-                        if (end2 === 1) {
-                            // Wrap pos2 around the end on values2:
-                            if (++pos2 >= length2)
-                                pos2 = 0;
-                            // Reuse cached values from initial search.
-                            v2 = values2[pos2] || curves2[pos2].getValues();
-                            end2 = 0;
-                        }
-                        if (!v1) {
-                            // We're done with curves1. If we're not back at the
-                            // start on curve2, the two paths are not identical.
-                            return start2[0] === pos2 && start2[1] === end2;
-                        }
-                        // All good, continue to avoid the break; further down.
-                        continue;
-                    }
-                }
-            }
-            // No overlap match found, break out early.
-            break;
-        }
-        return false;
-    },
 
     // TODO: intersects(item)
     // TODO: contains(item)
@@ -1294,10 +547,7 @@ var Path = PathItem.extend(/** @lends Path# */{
 }),
 
 new function() { // PostScript-style drawing commands
-    /**
-     * Helper method that returns the current segment and checks if a moveTo()
-     * command is required first.
-     */
+
     function getCurrentSegment(that) {
         var segments = that._segments;
         if (!segments.length)
