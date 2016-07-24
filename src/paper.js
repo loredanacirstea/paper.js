@@ -40,14 +40,12 @@ var paper = function(self, undefined) {
 /*#*/ include('core/Base.js');
 /*#*/ include('core/Emitter.js');
 /*#*/ include('core/PaperScope.js');
-/*#*/ include('core/PaperScopeItem.js');
 
 /*#*/ include('util/Formatter.js');
 /*#*/ include('util/Numerical.js');
 /*#*/ include('util/UID.js');
 
 /*#*/ include('basic/Point.js');
-/*#*/ include('basic/Size.js');
 /*#*/ include('basic/Rectangle.js');
 /*#*/ include('basic/Matrix.js');
 /*#*/ include('basic/Line.js');
@@ -55,7 +53,6 @@ var paper = function(self, undefined) {
 /*#*/ include('item/Project.js');
 /*#*/ include('item/Item.js');
 /*#*/ include('item/Group.js');
-/*#*/ include('item/Layer.js');
 
 /*#*/ include('path/Segment.js');
 /*#*/ include('path/SegmentPoint.js');
@@ -67,13 +64,7 @@ var paper = function(self, undefined) {
 
 /*#*/ include('path/PathItem.Boolean.js');
 
-
 /*#*/ include('svg/SvgExport.js');
-
-
-/*#*/ if (__options.paperScript) {
-/*#*/     include('core/PaperScript.js');
-/*#*/ }
 
 /*#*/ include('export.js');
 return paper;

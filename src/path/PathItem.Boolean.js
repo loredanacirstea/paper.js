@@ -56,7 +56,7 @@ PathItem.inject(new function() {
         if (closed)
             res.setClosed(true);
         return closed
-            ? res.resolveCrossings().reorient(true)//res.getFillRule() === 'nonzero')
+            ? res.resolveCrossings().reorient(res.getFillRule() === 'nonzero')
             : res;
     }
 
